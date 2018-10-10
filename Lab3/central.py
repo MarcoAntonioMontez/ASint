@@ -7,38 +7,45 @@ class book:
     def __init__(self,author,title,publication_year,identifier):
         self.author=author
         self.title=title
-        self.publication_year=publication_year
-        self.identifier=identifier
+        self.publication_year=int(publication_year)
+        self.identifier=int(identifier)
 
     def __repr__(self):
         return " ".join([ self.author,self.title,str(self.publication_year),str(self.identifier)])
 
 class bookDB:
     array=[]
+    identifier = -1
+
+    def getNewID(self):
+        return self.identifier + 1
 
     def insert_book(self,books):
-        for book in books:
-            self.array.append(book)
+        try:
+            for book in books:
+                self.array.append(book)
+            return "Ok"
+        except:
+            "Error inserting book"
 
     def show_book(self,book_identifier):
         for book in self.array:
-            if book.identifier == book_identifier:
-                print(book.__repr__())
+            if book.identifier == int(book_identifier):
+                return(book.__repr__())
 
     def list_all_authors(self):
         for book in self.array:
-            print(book.author)
+            return(book.author)
 
     def books_from_author(self,author):
         for book in self.array:
             if book.author == author:
-                print(book.__repr__())
+                return(book.__repr__())
 
     def books_from_year(self,year):
         for book in self.array:
-            if book.publication_year == year:
-                print(book.__repr__())
-
+            if book.publication_year == int(year):
+                return(book.__repr__())
 
 
 book1=book("mondovil", "pissa : the birth of something", 2013, 696969)
