@@ -3,7 +3,6 @@ Created on Fri Oct 10 10:02:24 2014
 
 @author: jnos
 """
-import book1
 import book
 import pickle
 

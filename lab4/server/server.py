@@ -3,7 +3,7 @@
 import Pyro4
 import bookDB
 
-
+# pyro4-nsc -n 193.136.128.108 -p 9090 list
 
 
 Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
@@ -14,9 +14,9 @@ def main():
         db = bookDB.bookDB("mylib")
 
 
-        daemon = Pyro4.Daemon()
+        daemon = Pyro4.Daemon(host = '192.168.65.129')
 
-        ns = Pyro4.locateNS()
+        ns = Pyro4.locateNS('193.136.128.108',9090)
         print (ns)
 
         try:
@@ -24,8 +24,8 @@ def main():
         except:
                 pass
 
-        uri = daemon.register(db, "BookDB")
-        ns.register("BookDB", uri)
+        uri = daemon.register(db, "BookDB-78508")
+        ns.register("BookDB-78508", uri)
 
         try:
                 daemon.requestLoop()

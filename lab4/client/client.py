@@ -7,7 +7,7 @@ import dbUI
 Pyro4.config.SERIALIZER = 'pickle'
 
 def main():
-        ns = Pyro4.locateNS()
+        ns = Pyro4.locateNS('193.136.128.108',9090)
         uri = ns.lookup('BookDB')
         
         db = Pyro4.Proxy(uri)
