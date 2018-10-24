@@ -16,7 +16,7 @@ def main():
 
         daemon = Pyro4.Daemon(host = '192.168.65.129')
 
-        ns = Pyro4.locateNS('193.136.128.108',9090)
+        ns = Pyro4.locateNS('193.136.128.109',9090)
         print (ns)
 
         try:
@@ -24,7 +24,7 @@ def main():
         except:
                 pass
 
-        uri = daemon.register(db, "BookDB-78508")
+        uri = daemon.register(db, "BookDB-78508_1")
         ns.register("BookDB-78508", uri)
 
         try:
