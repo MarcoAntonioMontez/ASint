@@ -59,7 +59,7 @@ def not_found(error):
 
 
 
-if __name__ == '__main__':
+if __name__ == '__app__':
     app.run(debug=True)
 
 #Get
