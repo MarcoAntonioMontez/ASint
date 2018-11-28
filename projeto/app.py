@@ -59,7 +59,7 @@ def not_found(error):
 
 
 
-if __name__ == '__app__':
+if __name__ == '__main__':
     app.run(debug=True)
 
 #Get
@@ -67,4 +67,4 @@ if __name__ == '__app__':
 
 
 #POST
-#curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "title":"Read a book"}' http://localhost:5000/asintproject/users
+#curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "latitude":"30" , "longitude":"40"}' http://localhost:5000/asintproject/users
