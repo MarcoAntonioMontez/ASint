@@ -35,7 +35,7 @@
 
         $("#searchText").autocomplete();
 
-        $( "#ButtonClick" ).click(function( event ) {
+        $( "#SearchButtonClick" ).click(function( event ) {
             console.log("click");
             $("#divDestiny").html("waiting");
             $.ajax({
@@ -51,16 +51,37 @@
                 }
             });
         });
+
+        $( "#NewUserButtonClick" ).click(function( event ) {
+            console.log("click");
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:5000/asintproject/users",
+                datatype: "json",
+                contentType: "application/json",
+                data: '{"id":"' + $("#newUserID").val() + '", "latitude":"' + $("#newLatitude").val() + '", "longitude":"' + $("#newLongitude").val() + '"}',
+                success: function (data) {
+                    alert('successful');
+                    console.log(data);
+                }
+            });
+        });
     });
-        //]]>
+
 </script>
 
 <h1>Welcome User</h1>
 
 <h1>Input a search term</h1>
     <input type="text" name="" size="20" id="searchText" />
-    <input type="submit" value="Search"  id="ButtonClick"/>
+    <input type="submit" value="Search"  id="SearchButtonClick"/>
     <div id="divDestiny">(this is where the text will go)</div>
+
+<h1>New User</h1>
+    ID:         <input type="text" name="" size="20" id="newUserID" /><br>
+    Longitude:  <input type="number" name="" size="20" id="newLongitude" /><br>
+    Latitude:   <input type="number" name="" size="20" id="newLatitude" /><br>
+    <input type="submit" value="Add User"  id="NewUserButtonClick"/><br>
 
 </body>
 </html>
