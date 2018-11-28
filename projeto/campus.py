@@ -1,5 +1,8 @@
+from builds import Building
+
 class Campus:
-    def __init__(self, new_id, new_name):
+    def __init__(self,new_type, new_id, new_name):
+        self.type = new_type
         self.id = new_id
         self.name = new_name
 
@@ -22,3 +25,11 @@ class Campus:
     def remove_building(self, building):
         self.list_of_buildings.remove(building)
         return 1
+
+    def __repr__(self):
+        build_str=""
+        for build in self.list_of_buildings:
+            build_str=build_str + "\n" + build.__repr__()
+
+        return "\n-----" + "\nType: " + str(self.type) + "\n Id: " + str(self.id) + "\n Name: " \
+               + str(self.name) + "\nList of buildings:\n " + build_str + "\n-----\n"

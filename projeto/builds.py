@@ -24,3 +24,8 @@ class Building:
         if new_id is not None:
             self.radius = radius
         return 1
+
+    def __repr__(self):
+        return ("\n-----" + "\nID: " + str(self.id) + "\n Name: " + str(self.name) + "\n TopLevel: " + str(self.toplevel_id)
+        + "\n Latitude: " + str(self.latitude) + "\n Longitude: " + str(self.longitude) + "\n Radius: " \
+        + str(self.radius)+ "\n-----\n")
