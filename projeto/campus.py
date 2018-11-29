@@ -29,7 +29,7 @@ class Campus:
     def __repr__(self):
         build_str=""
         for build in self.list_of_buildings:
-            build_str=build_str + "\n" + build.__repr__()
+            build_str=build_str + build.__repr__()
 
-        return "\n-----" + "\nType: " + str(self.type) + "\n Id: " + str(self.id) + "\n Name: " \
-               + str(self.name) + "\nList of buildings:\n " + build_str + "\n-----\n"
+        return "\n#############\n#############" + "\nType: " + str(self.type) + "\n Id: " + str(self.id) + "\n Name: " \
+               + str(self.name) + "\nList of buildings:\n " + build_str + "\n-----"

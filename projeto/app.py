@@ -3,6 +3,9 @@ import urllib3
 import json
 from campus import Campus
 from builds import Building
+from importCampee import ImportCampee
+import pickle
+from utils import *
 
 app = Flask(__name__)
 
@@ -36,7 +39,7 @@ users = [
     }
 ]
 
-campee_list = []
+campeeList = []
 
 # {
 #  "maps":[
@@ -73,7 +76,12 @@ campee_list = []
 #     }
 #   },
 
-
+def countBuildings(campee_list):
+    count = 0
+    for campee in campee_list:
+        for build in campee.list_of_buildings:
+            count = count + 1
+    return count
 
 def jsonToBuilding(data):
     new_id = data['id']
@@ -93,20 +101,10 @@ def jsonToCampus(data):
     return c
 
 
-def get_buildings() :
-    http = urllib3.PoolManager()
-    for buildingUrl in buildingUrls:
-        request = http.request('GET', buildingUrl)
-        data = json.loads(request.data.decode("utf-8"))
-
-        newCampus = jsonToCampus(data)
-        buildings = data['containedSpaces']
-        campee_list.append(newCampus)
-        for building in buildings:
-            new_building = jsonToBuilding(building)
-            newCampus.add_building(new_building)
-        print( newCampus.__repr__())
-    return
+def get_campee() :
+    ICampee = ImportCampee(buildingUrls)
+    campee_list = ICampee.get_campee();
+    return campee_list
 
 
 @app.route('/asintproject/users', methods=['GET'])
@@ -153,8 +151,22 @@ def not_found(error):
 
 
 ##Reads buildings from ist and stores them in campee_list
-get_buildings()
+campeeList=get_campee()
+# for campee in campeeList:
+#     print(campee.__repr__())
 
+# with open('ISTCampee.data', 'wb') as filehandle:
+#     # store the data as binary data stream
+#     pickle.dump(campeeList, filehandle)
+
+with open('ISTCampee.data', 'rb') as filehandle:
+    # read the data as binary data stream
+    test_list = pickle.load(filehandle)
+
+
+printList(test_list)
+print("\nNumber of saved buildings" + str(countBuildings(test_list)) + "\nNum requested buildings" +
+      str(countBuildings(campeeList)))
 
 
 if __name__ == '__main__':
