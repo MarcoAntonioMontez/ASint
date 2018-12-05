@@ -20,6 +20,7 @@ buildingUrls.append(ur1)
 buildingUrls.append(ur2)
 buildingUrls.append(ur3)
 
+
 ##Init de users para debug
 users = [
     {
@@ -83,25 +84,8 @@ def countBuildings(campee_list):
             count = count + 1
     return count
 
-def jsonToBuilding(data):
-    new_id = data['id']
-    new_name = data['name'].encode('utf-8')
-    toplevel_id = data['topLevelSpace']['id']
-    latitude = 0
-    longitude = 0
-    radius = 0
-    b = Building(new_id, new_name, toplevel_id, latitude, longitude, radius)
-    return b
-
-def jsonToCampus(data):
-    type = data['type']
-    id = data['id']
-    name = data['name'].encode('utf-8')
-    c = Campus(type,id,name)
-    return c
-
-
 def get_campee() :
+    print('\nget_campee\n')
     ICampee = ImportCampee(buildingUrls)
     campee_list = ICampee.get_campee();
     return campee_list
@@ -151,7 +135,8 @@ def not_found(error):
 
 
 ##Reads buildings from ist and stores them in campee_list
-campeeList=get_campee()
+
+#campeeList=get_campee()
 # for campee in campeeList:
 #     print(campee.__repr__())
 
@@ -159,18 +144,19 @@ campeeList=get_campee()
 #     # store the data as binary data stream
 #     pickle.dump(campeeList, filehandle)
 
-with open('ISTCampee.data', 'rb') as filehandle:
-    # read the data as binary data stream
-    test_list = pickle.load(filehandle)
+# with open('ISTCampee.data', 'rb') as filehandle:
+#     # read the data as binary data stream
+#     test_list = pickle.load(filehandle)
 
 
-printList(test_list)
-print("\nNumber of saved buildings" + str(countBuildings(test_list)) + "\nNum requested buildings" +
-      str(countBuildings(campeeList)))
-
+#printList(campeeList)
+#print("\nNumber of saved buildings" + str(countBuildings(campeeList)) + "\nNum requested buildings" +
+#      str(countBuildings(campeeList)))
+print('\nCenas\n')
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 #Get
 #  curl -i http://localhost:5000/asintproject/users/ist178508
