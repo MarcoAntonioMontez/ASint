@@ -13,6 +13,10 @@ class Campus:
         self.name = new_name
         return 1
 
+    def reset_buildings(self):
+        self.list_of_buildings=[]
+        return
+
     def add_building(self, building):
         for build in self.list_of_buildings:
             if build.id == building.id:

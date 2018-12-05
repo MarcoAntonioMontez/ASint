@@ -40,7 +40,6 @@ users = [
     }
 ]
 
-campeeList = []
 
 # {
 #  "maps":[
@@ -136,7 +135,16 @@ def not_found(error):
 
 ##Reads buildings from ist and stores them in campee_list
 
-#campeeList=get_campee()
+
+campeeList = []
+campeeList=get_campee()
+
+# print("\nNumber of campee: "+ str(len(campeeList)))
+#
+for campee in campeeList:
+    print(campee.__repr__())
+
+print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
 # for campee in campeeList:
 #     print(campee.__repr__())
 
@@ -152,7 +160,7 @@ def not_found(error):
 #printList(campeeList)
 #print("\nNumber of saved buildings" + str(countBuildings(campeeList)) + "\nNum requested buildings" +
 #      str(countBuildings(campeeList)))
-print('\nCenas\n')
+#print('\nCenas\n')
 
 if __name__ == '__main__':
     app.run(debug=True)

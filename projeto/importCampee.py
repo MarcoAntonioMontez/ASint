@@ -27,20 +27,19 @@ class ImportCampee:
         return campus
 
     def get_campee(self):
-        campeeList = []
+        self.campeeList = []
         http = urllib3.PoolManager()
         for url in self.campeeUrls:
-            print('\n for cycle\n')
             request = http.request('GET', url)
             data = json.loads(request.data.decode("utf-8"))
 
             newCampus = self.jsonToCampus(data)
+            newCampus.reset_buildings()
+
             buildings = data['containedSpaces']
             for building in buildings:
                 new_building = self.jsonToBuilding(building)
-                #print(new_building.__repr__())
-            #     newCampus.add_building(new_building)
-            # self.campeeList.append(newCampus)
-            # print(newCampus.__repr__())
+                newCampus.add_building(new_building)
+            self.campeeList.append(newCampus)
         return self.campeeList
 
