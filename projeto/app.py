@@ -102,8 +102,6 @@ def get_user(user_id):
         abort(404)
     return jsonify({'user': user[0]})
 
-
-
 @app.route('/asintproject/users', methods=['POST'])
 def create_user():
     if not request.json or not 'id' in request.json or not 'latitude' in request.json or not 'longitude' in request.json:
@@ -141,22 +139,28 @@ campeeList=get_campee()
 
 # print("\nNumber of campee: "+ str(len(campeeList)))
 #
-for campee in campeeList:
-    print(campee.__repr__())
-
-print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
+# for campee in campeeList:
+# #     print(campee.__repr__())
+#
+# print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
 # for campee in campeeList:
 #     print(campee.__repr__())
 
-# with open('ISTCampee.data', 'wb') as filehandle:
-#     # store the data as binary data stream
-#     pickle.dump(campeeList, filehandle)
+with open('ISTCampee.data', 'wb') as filehandle:
+    # store the data as binary data stream
+    pickle.dump(campeeList, filehandle)
 
-# with open('ISTCampee.data', 'rb') as filehandle:
-#     # read the data as binary data stream
-#     test_list = pickle.load(filehandle)
+with open('ISTCampee.data', 'rb') as filehandle:
+    # read the data as binary data stream
+    test_list = pickle.load(filehandle)
 
 
+print("\nNumber of campee: "+ str(len(test_list)))
+
+for campee in test_list:
+    print(campee.__repr__())
+
+print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
 #printList(campeeList)
 #print("\nNumber of saved buildings" + str(countBuildings(campeeList)) + "\nNum requested buildings" +
 #      str(countBuildings(campeeList)))
