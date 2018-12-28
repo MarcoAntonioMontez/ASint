@@ -145,10 +145,10 @@ campeeList=get_campee()
 # print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
 # for campee in campeeList:
 #     print(campee.__repr__())
-
-with open('ISTCampee.data', 'wb') as filehandle:
-    # store the data as binary data stream
-    pickle.dump(campeeList, filehandle)
+#
+# with open('ISTCampee.data', 'wb') as filehandle:
+#     # store the data as binary data stream
+#     pickle.dump(campeeList, filehandle)
 
 with open('ISTCampee.data', 'rb') as filehandle:
     # read the data as binary data stream
