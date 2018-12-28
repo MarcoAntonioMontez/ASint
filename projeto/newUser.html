@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>Montalvil/Cordalvez</title>
+    <style type="text/css">
+
+    </style>
+   <link rel="stylesheet" href="jquery-ui.css"> </link>
+    <script src="jquery.js"></script>
+     <script src="jquery-ui.js"></script>
+
+     <style>
+  .ui-autocomplete {
+    max-height: 100px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+  }
+  /* IE 6 doesn't support max-height
+   * we use height instead, but this forces the menu to always be this tall
+   */
+  * html .ui-autocomplete {
+    height: 100px;
+  }
+  </style>
+</head>
+
+<body>
+<script>
+       //<![CDATA[
+    $( document ).ready(function() {
+
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+
+
+        function showPosition(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            alert("Latitude:" + latitude + "   Longitude :" + longitude);
+
+
+            $( "#NewUserButtonClick" ).click(function( event ) {
+                console.log("click");
+                $.ajax({
+                    type: "POST",
+                    url: "http://localhost:5000/asintproject/users",
+                    datatype: "json",
+                    contentType: "application/json",
+                    data: '{"id":"' + $("#newUserID").val() + '", "latitude":"' + latitude + '", "longitude":"' + longitude + '"}',
+                    success: function (data) {
+                        //alert('successful');
+                        console.log(data);
+                        //window.location.href = "mainPage.html";
+                    }
+                });
+
+            });
+        }
+    });
+
+</script>
+
+<h1>Montalvil/Cordalvez</h1>
+
+<h2>Create or Update User</h2>
+
+
+    ID:         <input type="text" name="" size="20" id="newUserID" /><br>
+
+    <input type="submit" value="Add User"  id="NewUserButtonClick"/><br>
+
+<a href = "mainPage.html"> Go to message page</a>
+
+<!--<form action='mainPage.html' method='POST'>
+
+
+   Go to message page <input type="submit" value="Go"  id="GoButtonClick"/><br>
+
+</form>
+-->
+</body>
+</html>
