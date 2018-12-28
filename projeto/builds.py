@@ -21,7 +21,7 @@ class Building:
             self.latitude = latitude
         if longitude is not None:
             self.longitude = longitude
-        if new_id is not None:
+        if radius is not None:
             self.radius = radius
         return 1
 

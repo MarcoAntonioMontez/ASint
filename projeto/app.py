@@ -3,6 +3,7 @@ import urllib3
 import json
 from campus import Campus
 from builds import Building
+import range
 from importCampee import ImportCampee
 import pickle
 from utils import *
@@ -25,13 +26,13 @@ buildingUrls.append(ur3)
 users = [
     {
         'id': 'ist178508',
-        'latitude': 10.0000,
-        'longitude': 10.0001
+        'latitude': 38.736747,
+        'longitude': -9.139328
     },
     {
         'id': 'ist179021',
-        'latitude': 10.0000,
-        'longitude': 10.0002
+        'latitude': 38.73715,
+        'longitude': -9.302892
     },
     {
         'id': 'ist178181',
@@ -40,41 +41,20 @@ users = [
     }
 ]
 
+campeeList = []
 
-# {
-#  "maps":[
-#          {"id":"blabla","iscategorical":"0"},
-#          {"id":"blabla","iscategorical":"0"}
-#         ],
-# "masks":
-#          {"id":"valore"},
-# "om_points":"value",
-# "parameters":
-#          {"id":"valore"}
-# }
+with open('ISTCampee.data', 'rb') as filehandle:
+    # read the data as binary data stream
+    campee_list = pickle.load(filehandle)
+
+
+##Print Campee list
+# print("\nNumber of campee: "+ str(len(campee_list)))
 #
-# data["maps"][0]["id"]  # will return 'blabla'
-# data["masks"]["id"]    # will return 'valore'
-# data["om_points"]
-
-
-
-
-
-# {
-#   "type" : "CAMPUS",
-#   "id" : "2448131392438",
-#   "name" : "Tecnologico e Nuclear",
-#   "containedSpaces" : [ {
-#     "type" : "ROOM",
-#     "id" : "1691297991622663",
-#     "name" : "Administracao",
-#     "topLevelSpace" : {
-#       "type" : "CAMPUS",
-#       "id" : "2448131392438",
-#       "name" : "Tecnologico e Nuclear"
-#     }
-#   },
+# for campee in campee_list:
+#     print(campee.__repr__())
+#
+# print("\nNumber of saved buildings" + str(countBuildings(campee_list)))
 
 def countBuildings(campee_list):
     count = 0
@@ -89,6 +69,16 @@ def get_campee() :
     campee_list = ICampee.get_campee();
     return campee_list
 
+def get_building(campees,building_name):
+    building=[]
+    for campus in campees:
+        for build in campus.list_of_buildings:
+            formated_name=build.name.replace(" ", "")
+            if formated_name==building_name:
+                building = build
+                return building
+    return building
+
 
 @app.route('/asintproject/users', methods=['GET'])
 def get_users():
@@ -101,6 +91,27 @@ def get_user(user_id):
     if len(user) == 0:
         abort(404)
     return jsonify({'user': user[0]})
+
+@app.route('/asintproject/users/building/<string:building_name>', methods=['GET'])
+def get_users_in_building(building_name):
+    #Falta tirar os acentos dos edificios
+
+    building = get_building(campee_list,building_name)
+
+    if building == []:
+        abort(404)
+
+    lat=float(building.latitude)
+    long=float(building.longitude)
+    rad=float(building.radius)
+    return jsonify({'name': building.name})
+    user_list=[]
+    for user in users:
+        u_lat=user["latitude"]
+        u_long=user["longitude"]
+        if range.is_in_range(u_lat,u_long,lat,long,rad):
+            user_list.append(user)
+    return jsonify({'users': user_list})
 
 @app.route('/asintproject/users', methods=['POST'])
 def create_user():
@@ -131,40 +142,6 @@ def not_found(error):
     return make_response(jsonify({'error': 'Bad request'}), 400)
 
 
-##Reads buildings from ist and stores them in campee_list
-
-
-campeeList = []
-campeeList=get_campee()
-
-# print("\nNumber of campee: "+ str(len(campeeList)))
-#
-# for campee in campeeList:
-# #     print(campee.__repr__())
-#
-# print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
-# for campee in campeeList:
-#     print(campee.__repr__())
-#
-# with open('ISTCampee.data', 'wb') as filehandle:
-#     # store the data as binary data stream
-#     pickle.dump(campeeList, filehandle)
-
-with open('ISTCampee.data', 'rb') as filehandle:
-    # read the data as binary data stream
-    test_list = pickle.load(filehandle)
-
-
-print("\nNumber of campee: "+ str(len(test_list)))
-
-for campee in test_list:
-    print(campee.__repr__())
-
-print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
-#printList(campeeList)
-#print("\nNumber of saved buildings" + str(countBuildings(campeeList)) + "\nNum requested buildings" +
-#      str(countBuildings(campeeList)))
-#print('\nCenas\n')
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -172,6 +149,8 @@ if __name__ == '__main__':
 
 #Get
 #  curl -i http://localhost:5000/asintproject/users/ist178508
+
+#  curl -i http://localhost:5000/asintproject/users/building/biblioteca
 
 
 #POST
