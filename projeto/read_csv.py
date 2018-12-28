@@ -3,39 +3,40 @@ import pickle
 
 with open('ISTCampee.data', 'rb') as filehandle:
     # read the data as binary data stream
-    test_list = pickle.load(filehandle)
-
-# for campee in test_list:
-#     print(campee.__repr__())
+    campeeList = pickle.load(filehandle)
 
 list_buildings=[]
 
-def countBuildings(campee_list):
+def countBuildings(campeeList ):
     count = 0
-    for campee in campee_list:
+    for campee in campeeList :
         for build in campee.list_of_buildings:
             build.name = build.name.decode('utf-8')
             list_buildings.append(build)
             count = count + 1
     return count
 
-print("\nNumber of campee: "+ str(len(test_list)))
-print("\nNumber of saved buildings: " + str(countBuildings(test_list)))
+print("\nNumber of campee: "+ str(len(campeeList )))
+print("\nNumber of saved buildings: " + str(countBuildings(campeeList )))
 
 
 f = open('coordenadas.csv', encoding="utf-8")
 reader = csv.DictReader( f, fieldnames=('espaco', 'latitude', 'longitude', 'radius'))
 
-# for row in reader:
-#     print(str(row))
+for row in reader:
+    for build in list_buildings:
+        name=row['espaco']
+        latitude = row['latitude']
+        longitude = row['longitude']
+        radius = row['radius']
+        if name==build.name:
+            build.latitude = latitude
+            build.longitude = longitude
+            build.radius = radius
 
-for build in list_buildings:
-    for row in reader:
-        if build.name==row:
-            build.latitude=200
-    print(build.__repr__())
+# for campee in campeeList:
+#     print(campee.__repr__())
 
-
-#Checks that value is passed by reference
-for campee in test_list:
-    print(campee.__repr__())
+with open('ISTCampee.data', 'wb') as filehandle:
+    # store the data as binary data stream
+    pickle.dump(campeeList, filehandle)

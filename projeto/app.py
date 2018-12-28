@@ -39,43 +39,6 @@ users = [
         'longitude': 69
     }
 ]
-
-
-# {
-#  "maps":[
-#          {"id":"blabla","iscategorical":"0"},
-#          {"id":"blabla","iscategorical":"0"}
-#         ],
-# "masks":
-#          {"id":"valore"},
-# "om_points":"value",
-# "parameters":
-#          {"id":"valore"}
-# }
-#
-# data["maps"][0]["id"]  # will return 'blabla'
-# data["masks"]["id"]    # will return 'valore'
-# data["om_points"]
-
-
-
-
-
-# {
-#   "type" : "CAMPUS",
-#   "id" : "2448131392438",
-#   "name" : "Tecnologico e Nuclear",
-#   "containedSpaces" : [ {
-#     "type" : "ROOM",
-#     "id" : "1691297991622663",
-#     "name" : "Administracao",
-#     "topLevelSpace" : {
-#       "type" : "CAMPUS",
-#       "id" : "2448131392438",
-#       "name" : "Tecnologico e Nuclear"
-#     }
-#   },
-
 def countBuildings(campee_list):
     count = 0
     for campee in campee_list:
@@ -135,36 +98,19 @@ def not_found(error):
 
 
 campeeList = []
-campeeList=get_campee()
-
-# print("\nNumber of campee: "+ str(len(campeeList)))
-#
-# for campee in campeeList:
-# #     print(campee.__repr__())
-#
-# print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
-# for campee in campeeList:
-#     print(campee.__repr__())
-#
-# with open('ISTCampee.data', 'wb') as filehandle:
-#     # store the data as binary data stream
-#     pickle.dump(campeeList, filehandle)
 
 with open('ISTCampee.data', 'rb') as filehandle:
     # read the data as binary data stream
-    test_list = pickle.load(filehandle)
+    campee_list = pickle.load(filehandle)
 
 
-print("\nNumber of campee: "+ str(len(test_list)))
-
-for campee in test_list:
-    print(campee.__repr__())
-
-print("\nNumber of saved buildings" + str(countBuildings(campeeList)))
-#printList(campeeList)
-#print("\nNumber of saved buildings" + str(countBuildings(campeeList)) + "\nNum requested buildings" +
-#      str(countBuildings(campeeList)))
-#print('\nCenas\n')
+##Print Campee list
+# print("\nNumber of campee: "+ str(len(campee_list)))
+#
+# for campee in campee_list:
+#     print(campee.__repr__())
+#
+# print("\nNumber of saved buildings" + str(countBuildings(campee_list)))
 
 if __name__ == '__main__':
     app.run(debug=True)
