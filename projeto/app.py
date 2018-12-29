@@ -6,7 +6,7 @@ from builds import Building
 import range
 from importCampee import ImportCampee
 import pickle
-from utils import *
+import utils
 
 app = Flask(__name__)
 
@@ -26,24 +26,29 @@ buildingUrls.append(ur3)
 users = [
     {
         'id': 'ist178508',
-        'latitude': 38.736747,
-        'longitude': -9.139328
+        'latitude': 38.811977, #Biblioteca
+        'longitude': -9.094261
     },
     {
-        'id': 'ist179021',
-        'latitude': 38.73715,
-        'longitude': -9.302892
+        'id': 'ist179021', #PavilhaodeCivil
+        'latitude': 38.737466,
+        'longitude': -9.140206
     },
     {
         'id': 'ist178181',
-        'latitude': 69,
-        'longitude': 69
+        'latitude': 38.737579, #TorreNorte
+        'longitude': -9.138582
+    },
+{
+        'id': 'ist176969',
+        'latitude': 38.812030, #Biblioteca # 5meters from ist178508
+        'longitude': -9.094262
     }
 ]
 
 campeeList = []
 
-with open('ISTCampee.data', 'rb') as filehandle:
+with open('ISTCampee_formated.data', 'rb') as filehandle:
     # read the data as binary data stream
     campee_list = pickle.load(filehandle)
 
@@ -73,11 +78,15 @@ def get_building(campees,building_name):
     building=[]
     for campus in campees:
         for build in campus.list_of_buildings:
-            formated_name=build.name.replace(" ", "")
+            formated_name=build.name
             if formated_name==building_name:
                 building = build
                 return building
     return building
+
+def get_user_from_id(user_id):
+    user = [user for user in users if user['id'] == user_id]
+    return user[0]
 
 
 @app.route('/asintproject/users', methods=['GET'])
@@ -92,19 +101,35 @@ def get_user(user_id):
         abort(404)
     return jsonify({'user': user[0]})
 
+@app.route('/asintproject/users/nearby/<string:user_id>/<string:radius>', methods=['GET'])
+def get_user_nearby(user_id,radius):
+    radius = float(radius)
+    #transform dict list to user list
+    user_list=utils.dict_list_to_users(users)
+    #get corresponding dict_user
+    client_user_dict=get_user_from_id(user_id)
+    # transform dict_user to user
+    client_user=utils.dict_to_user(client_user_dict)
+
+    #Get users nearby
+    nearby_users=range.nearby_users(user_list,client_user,radius)
+    # Store users as dict_users
+    nearby_users_dict=utils.users_to_dict_list(nearby_users)
+    if len(nearby_users_dict) == 0:
+        abort(404)
+    return jsonify({'nearby_users': nearby_users_dict})
+
 @app.route('/asintproject/users/building/<string:building_name>', methods=['GET'])
 def get_users_in_building(building_name):
     #Falta tirar os acentos dos edificios
-
     building = get_building(campee_list,building_name)
-
     if building == []:
         abort(404)
 
     lat=float(building.latitude)
     long=float(building.longitude)
     rad=float(building.radius)
-    return jsonify({'name': building.name})
+    # return jsonify({'name': building.name})
     user_list=[]
     for user in users:
         u_lat=user["latitude"]
@@ -148,10 +173,17 @@ if __name__ == '__main__':
 
 
 #Get
+#  curl -i http://localhost:5000/asintproject/users
 #  curl -i http://localhost:5000/asintproject/users/ist178508
 
-#  curl -i http://localhost:5000/asintproject/users/building/biblioteca
+#  curl -i http://localhost:5000/asintproject/users/building/Biblioteca
+#  curl -i http://localhost:5000/asintproject/users/building/PavilhaodeCivil
+#  curl -i http://localhost:5000/asintproject/users/building/TorreNorte
+
+#  curl -i http://localhost:5000/asintproject/users/nearby/ist178508/10
 
 
 #POST
 #curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "latitude":"30" , "longitude":"40"}' http://localhost:5000/asintproject/users
+
+#curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "latitude":"38.811978" , "longitude":"-9.094261"}' http://localhost:5000/asintproject/users
