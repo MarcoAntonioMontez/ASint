@@ -7,6 +7,7 @@ import range
 from importCampee import ImportCampee
 import pickle
 import utils
+from message import Message
 
 app = Flask(__name__)
 
@@ -47,6 +48,7 @@ users = [
 ]
 
 campeeList = []
+message_list = []
 
 with open('ISTCampee_formated.data', 'rb') as filehandle:
     # read the data as binary data stream
@@ -157,6 +159,30 @@ def create_user():
     users.append(user)
     return jsonify({'user': user}), 201
 
+@app.route('/asintproject/users/message', methods=['POST'])
+def receive_user_message():
+    if not request.json or not 'id' in request.json or not 'message' in request.json or not 'radius' in request.json:
+        abort(400)
+    message_dict = {
+        'id': request.json['id'],
+        'message': request.json['message'],
+        'radius': request.json['radius'],
+        'latitude': request.json['latitude'],
+        'longitude': request.json['longitude']
+    }
+
+    message = Message(message_dict)
+    message_list.append(message)
+
+    return jsonify({'message': message_dict}), 201
+
+@app.route('/asintproject/users/messages_all', methods=['GET'])
+def get_messages_all():
+    messages_dict=[]
+    for message in message_list:
+        messages_dict.append(message.get_dict())
+    return jsonify({'messages_all': messages_dict})
+
 
 @app.errorhandler(404)
 def not_found(error):
@@ -183,7 +209,16 @@ if __name__ == '__main__':
 #  curl -i http://localhost:5000/asintproject/users/nearby/ist178508/10
 
 
+
+
 #POST
 #curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "latitude":"30" , "longitude":"40"}' http://localhost:5000/asintproject/users
 
 #curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "latitude":"38.811978" , "longitude":"-9.094261"}' http://localhost:5000/asintproject/users
+
+
+#Enviar Menssagem
+#curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "message":"Hello this is a message", "radius":"10", "latitude":"38.811978" , "longitude":"-9.094261"}' http://localhost:5000/asintproject/users/message
+
+#Ver Log de mensagens
+#curl -i http://localhost:5000/asintproject/users/messages_all
