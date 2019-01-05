@@ -1,8 +1,9 @@
-drop table users;
-drop table log;
-drop table user_move;
-drop table building;
 
+drop table building;
+drop table user_msg;
+drop table user_move;
+drop table logs;
+drop table users;
 
 -- Admin users in the system (not implemented yet) TODO
 
@@ -12,8 +13,10 @@ create table users
 	 user_longitude float(15) not null,
 	 primary key(user_id));
 
-create table log
-	(content_id	int not null, --This references either user_move or user_msg depending on entry_type
+create table logs
+	(log_id	int not null,
+	 content_id	int not null,
+	 user_id	varchar(20) not null,
 	 entry_type ENUM('Move', 'Msg') not null,
 	 primary key(log_id),
 	 foreign key(user_id) references users(user_id));
@@ -27,7 +30,7 @@ create table user_move
 	 new_latitude	float(15) not null,
 	 new_longitude	float(15) not null,
 	 primary key(move_id),
-	 foreign key(user_id) references users(user_id)),
+	 foreign key(user_id) references users(user_id));
 
 create table user_msg
 	(msg_id	int not null unique,
@@ -38,7 +41,7 @@ create table user_msg
 	 longitude	float(15) not null,
 	 radius float(2) not null,
 	 primary key(msg_id),
-	 foreign key(user_id) references users(user_id)),
+	 foreign key(user_id) references users(user_id));
 
 
 create table building
@@ -47,4 +50,4 @@ create table building
 	 latitude	float(15) not null,
 	 longitude	float(15) not null,
 	 radius float(2) not null,
-	 primary key(building_id);
+	 primary key(building_id));

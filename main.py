@@ -35,6 +35,12 @@ buildingUrls.append(ur1)
 buildingUrls.append(ur2)
 buildingUrls.append(ur3)
 
+import MySQLdb
+
+connection = MySQLdb.connect (host = "localhost",
+                              user = "testuser",
+                              passwd = "testpass",
+                              db = "company")
 
 ##Init de users para debug
 users = [
