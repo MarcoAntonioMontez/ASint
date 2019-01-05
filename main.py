@@ -3,10 +3,10 @@ from requests_oauthlib import OAuth2Session
 import requests
 import urllib3
 import json
-from campus import Campus
-from builds import Building
+from class_campus import Campus
+from class_builds import Building
 import range
-from importCampee import ImportCampee
+from class_importCampee import ImportCampee
 import pickle
 import utils
 from message import Message

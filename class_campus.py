@@ -1,4 +1,4 @@
-from builds import Building
+from class_builds import Building
 
 class Campus:
     def __init__(self,new_type, new_id, new_name):

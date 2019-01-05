@@ -1,5 +1,5 @@
-from campus import Campus
-from builds import Building
+from class_campus import Campus
+from class_builds import Building
 import urllib3
 import json
 
