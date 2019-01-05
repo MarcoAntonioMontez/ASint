@@ -3,10 +3,10 @@ from requests_oauthlib import OAuth2Session
 import requests
 import urllib3
 import json
-from class_campus import Campus
-from class_builds import Building
+from campus import Campus
+from builds import Building
 import range
-from class_importCampee import ImportCampee
+from importCampee import ImportCampee
 import pickle
 import utils
 from message import Message
@@ -117,9 +117,9 @@ def callback():
     #parse json
     tokentext = json.loads(tokenresponse.text)
     #this is how yout get the access token. you can also obtain 'refresh_token' and 'expires_in' values this way
-    print(tokentext['access_token']) 
+    #print(tokentext['access_token']) 
     # memcache.add(key="token"+userno, value=tokentext.access_token, time=3600)
-    return render_template('mainPage.html')
+    return render_template('index.html')
 
 @app.route('/asintproject/users', methods=['GET'])
 def get_users():
