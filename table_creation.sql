@@ -1,5 +1,5 @@
 drop table users;
-drop table log;
+drop table logs;
 drop table user_move;
 drop table building;
 
@@ -12,7 +12,7 @@ create table users
 	 user_longitude float(15) not null,
 	 primary key(user_id));
 
-create table log
+create table logs
 	(content_id	int not null, --This references either user_move or user_msg depending on entry_type
 	 entry_type ENUM('Move', 'Msg') not null,
 	 primary key(log_id),
