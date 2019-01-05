@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, jsonify,abort,make_response, redirect, session
+from requests_oauthlib import OAuth2Session
+import requests
 import urllib3
 import json
 from campus import Campus
@@ -14,11 +16,14 @@ import fenixedu
 config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
 client = fenixedu.FenixEduClient(config)
 
+base_url = 'https://fenix.tecnico.ulisboa.pt/'
+
 
 app = Flask(__name__)
 CORS(app)
 
 app.secret_key = 'SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw=='
+client_id='1414440104755257'
 
 ##Isto podia ficar numa classe
 buildingUrls = []
@@ -100,12 +105,21 @@ def get_user_from_id(user_id):
 
 @app.route('/')
 def home():
-    if not session.get('logged_in'):
-        session['logged_in']=True
-        return redirect('https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/')
-    else:
-        return render_template('mainPage.html')
+     fenix = OAuth2Session(client_id)
+     authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
+     return redirect(authorization_url)
 
+@app.route('/callback', methods=["GET"])
+def callback():
+    tokencode = request.args.get('code')
+    #obtain access token with post request
+    tokenresponse = requests.post("https://fenix.tecnico.ulisboa.pt/oauth/access_token?client_id=1414440104755257&client_secret=SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw==&redirect_uri=https://asint-227116.appspot.com/callback&code="+tokencode+"&grant_type=authorization_code")
+    #parse json
+    tokentext = json.loads(tokenresponse.text)
+    #this is how yout get the access token. you can also obtain 'refresh_token' and 'expires_in' values this way
+    print(tokentext['access_token']) 
+    # memcache.add(key="token"+userno, value=tokentext.access_token, time=3600)
+    return render_template('mainPage.html')
 
 @app.route('/asintproject/users', methods=['GET'])
 def get_users():
