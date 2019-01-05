@@ -4,96 +4,6 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Message Page</title>
-    <style type="text/css">
-
-    </style>
-   <link rel="stylesheet" href="static/jquery-ui.css"> </link>
-    <script src="static/jquery.js"></script>
-     <script src="static/jquery-ui.js"></script>
-
-     <style>
-  .ui-autocomplete {
-    max-height: 100px;
-    overflow-y: auto;
-    /* prevent horizontal scrollbar */
-    overflow-x: hidden;
-  }
-  /* IE 6 doesn't support max-height
-   * we use height instead, but this forces the menu to always be this tall
-   */
-  * html .ui-autocomplete {
-    height: 100px;
-  }
-  </style>
-</head>
-
-<body>
-<script>
-       //<![CDATA[
-    $( document ).ready(function() {
-
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition);
-
-        } else {
-            alert("Geolocation is not supported by this browser.");
-        }
-
-        /*É preciso fazer request do id do user*/
-
-        function showPosition(position) {
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
-
-
-            $( "#sendMsgButtonClick" ).click(function( event ) {
-                console.log("click");
-                $.ajax({
-                    type: "POST",
-                    url: "http://asint-227116.appspot.com/asintproject/users/message", 
-                    datatype: "json",
-                    contentType: "application/json",
-                    data: '{"id":"' + "ist179021" + '", "message":"' + $("#msg_body").val() + '", "radius":"' + $("#msg_radius").val() + '", "latitude":"' + latitude + '", "longitude":"' + longitude + '"}',
-                    success: function (data) {
-                        //alert('successful');
-                        console.log(data);
-                        //window.location.href = "mainPage.html";
-                    }
-                });
-
-            });
-        }
-    });
-
-</script>
-
-<h1>Message Page</h1>
-
-<h2>Create or Update User</h2>
-
-
-    Message:         <input type="text" name="" size="100" id="msg_body" /><br>
-    Radius:         <input type="number" name="" id="msg_radius" /><br>
-
-    <input type="submit" value="Send"  id="sendMsgButtonClick"/><br>
-
-<form action='index.html' method='POST'>
-
-
-   Go to message page <input type="submit" value="Go"  id="GoButtonClick"/><br>
-
-</form>
-
-</body>
-</html>
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
     <title>Index</title>
     <style type="text/css">
     </style>
@@ -158,4 +68,3 @@
 
 </body>
 </html>
-
