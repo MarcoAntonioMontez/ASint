@@ -14,6 +14,7 @@ create table users
 
 create table logs
 	(content_id	int not null, --This references either user_move or user_msg depending on entry_type
+	 user_id	varchar(20) not null,
 	 entry_type ENUM('Move', 'Msg') not null,
 	 primary key(log_id),
 	 foreign key(user_id) references users(user_id));
