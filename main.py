@@ -125,6 +125,14 @@ def callback():
 def get_users():
     return jsonify({'users': users})
 
+@app.route('/sendMessage.html')
+def sendMessage():
+    return render_template('sendMessage.html')
+
+@app.route('/index.html')
+def indexHTML():
+    return render_template('index.html')
+
 
 @app.route('/asintproject/users/<string:user_id>', methods=['GET'])
 def get_user(user_id):
