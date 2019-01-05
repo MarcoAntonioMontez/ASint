@@ -29,7 +29,7 @@ create table user_move
 	 new_latitude	float(15) not null,
 	 new_longitude	float(15) not null,
 	 primary key(move_id),
-	 foreign key(user_id) references users(user_id)),
+	 foreign key(user_id) references users(user_id));
 
 create table user_msg
 	(msg_id	int not null unique,
@@ -40,7 +40,7 @@ create table user_msg
 	 longitude	float(15) not null,
 	 radius float(2) not null,
 	 primary key(msg_id),
-	 foreign key(user_id) references users(user_id)),
+	 foreign key(user_id) references users(user_id));
 
 
 create table building
@@ -49,4 +49,4 @@ create table building
 	 latitude	float(15) not null,
 	 longitude	float(15) not null,
 	 radius float(2) not null,
-	 primary key(building_id);
+	 primary key(building_id));
