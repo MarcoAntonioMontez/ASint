@@ -1,8 +1,9 @@
-drop table users;
-drop table logs;
-drop table user_move;
-drop table building;
 
+drop table building;
+drop table user_msg;
+drop table user_move;
+drop table logs;
+drop table users;
 
 -- Admin users in the system (not implemented yet) TODO
 
