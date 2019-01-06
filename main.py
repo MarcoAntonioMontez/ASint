@@ -109,13 +109,13 @@ def get_user_from_id(user_id):
 def home():
      return render_template('login.html')
 
-@app.route('/redirect', methods=["POST"])
+@app.route('/redirect')
 def my_redirect():
     
-    user_latitude = request.json['latitude'],
-    user_longitude = request.json['longitude']
-    session['user_latitude']=user_latitude
-    session['user_longitude']=user_longitude
+   # user_latitude = request.json['latitude'],
+   # user_longitude = request.json['longitude']
+   # session['user_latitude']=user_latitude
+   # session['user_longitude']=user_longitude
 
     fenix = OAuth2Session(client_id)
     authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
