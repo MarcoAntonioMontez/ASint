@@ -1,17 +1,13 @@
 class User:
     #User radius is optional in constructed
     #If a radius is not given, its default value is 0
-    def __init__(self, new_id, new_latitude, new_longitude,radius=0):
+    def __init__(self, new_id, new_latitude, new_longitude):
         self.id = new_id
         self.latitude = float(new_latitude)
         self.longitude = float(new_longitude)
-        self.radius=float(radius)
 
     def get_id(self):
         return self.id
-
-    def radius(self):
-        return self.radius
 
     def get_position(self):
         return [self.latitude, self.longitude]

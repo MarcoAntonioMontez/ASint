@@ -5,6 +5,7 @@ import urllib3
 import json
 from campus import Campus
 from builds import Building
+from user import User
 import range
 from importCampee import ImportCampee
 import pickle
@@ -39,29 +40,7 @@ buildingUrls.append(ur3)
 
 
 ##Init de users para debug
-users = [
-    {
-        'id': 'ist178508',
-        'latitude': 38.811977, #Biblioteca
-        'longitude': -9.094261
-    },
-    {
-        'id': 'ist179021', #PavilhaodeCivil
-        'latitude': 38.737466,
-        'longitude': -9.140206
-    },
-    {
-        'id': 'ist178181',
-        'latitude': 38.737579, #TorreNorte
-        'longitude': -9.138582
-    },
-{
-        'id': 'ist176969',
-        'latitude': 38.812030, #Biblioteca # 5meters from ist178508
-        'longitude': -9.094262
-    }
-]
-
+users = []
 campeeList = []
 message_list = []
 
@@ -109,13 +88,13 @@ def get_user_from_id(user_id):
 def home():
      return render_template('login.html')
 
-@app.route('/redirect')
+@app.route('/redirect', methods=["POST"])
 def my_redirect():
     
-   # user_latitude = request.json['latitude'],
-   # user_longitude = request.json['longitude']
-   # session['user_latitude']=user_latitude
-   # session['user_longitude']=user_longitude
+    user_latitude = request.form['latitude']
+    user_longitude = request.form['longitude']
+    session['user_latitude']=user_latitude
+    session['user_longitude']=user_longitude
 
     fenix = OAuth2Session(client_id)
     authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
@@ -133,14 +112,13 @@ def callback():
     
     fenixuser = client.get_user_by_code(tokencode)
     person = client.get_person(fenixuser)
-    
-    #user1 = user(person['username'], None, None)
-    
+ 
+    #user1 = User(person['username'], float(session['user_latitude']), float(session['user_longitude']))
     #users.append(user1)
-    
+   
     token = fenixuser.access_token
-    print(token)
-    #memcache.add(key="token", value=tokentext.access_token, time=3600)
+    session['access_token']=token
+    memcache.add(key=person['username'], value=token, time=600)
     return redirect(url_for('index'))
 
 
