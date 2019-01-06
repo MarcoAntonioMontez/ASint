@@ -12,7 +12,24 @@ import utils
 from message import Message
 from flask_cors import CORS
 import fenixedu
-import mysqlx
+import mysql.connector
+
+cnx = mysql.connector.connect(user='scott', password='password',
+                              host='127.0.0.1',
+                              database='employees')
+							  
+cursor = cnx.cursor()
+
+query = ("SELECT * FROM users")
+
+cursor.execute(query)
+
+for (user_id, user_latitude) in cursor:
+  print("{}, {}".format(
+    user_id, user_latitude))
+
+cursor.close()
+cnx.close()
 
 config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
 client = fenixedu.FenixEduClient(config)
@@ -237,7 +254,7 @@ def testar():
 	myresult = mycursor.fetchall()
 	session.close()
 
-	return myresult
+	return jsonify({myresult})
 	
 @app.errorhandler(404)
 def not_found(error):
