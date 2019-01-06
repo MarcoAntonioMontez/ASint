@@ -229,7 +229,7 @@ def testar():
 		'port': 33060,
 		'user': 'root',
 		'password': '123qweASD',
-		'database':	'ist178614'
+		'database':	'asintdb'
 	})
 	mycursor = mydb.cursor()
 
