@@ -228,12 +228,11 @@ def testar():
 		'host': '35.242.185.194',
 		'port': 33060,
 		'user': 'root',
-		'password': '123qweASD',
-		'database':	'asintdb'
+		'password': '123qweASD'
 	})
 	mycursor = mydb.cursor()
 
-	mycursor.execute("SELECT * FROM users")
+	mycursor.execute("SELECT * FROM asintdb.users")
 
 	myresult = mycursor.fetchall()
 	session.close()
