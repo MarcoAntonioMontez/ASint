@@ -12,6 +12,7 @@ import utils
 from message import Message
 from flask_cors import CORS
 import fenixedu
+import mysqlx
 
 config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
 client = fenixedu.FenixEduClient(config)
@@ -35,12 +36,7 @@ buildingUrls.append(ur1)
 buildingUrls.append(ur2)
 buildingUrls.append(ur3)
 
-#import MySQLdb
 
-#connection = MySQLdb.connect (host = "localhost",
-#                              user = "testuser",
-#                              passwd = "testpass",
-#                              db = "company")
 
 ##Init de users para debug
 users = [
@@ -226,7 +222,24 @@ def get_messages_all():
         messages_dict.append(message.get_dict())
     return jsonify({'messages_all': messages_dict})
 
+@app.route('/testestest', methods=['GET'])
+def testar();
+	session = mysqlx.get_session({
+		'host': '35.242.185.194',
+		'port': 33060,
+		'user': 'root',
+		'password': '123qweASD',
+		'database':	'ist178614'
+	})
+	mycursor = mydb.cursor()
 
+	mycursor.execute("SELECT * FROM users")
+
+	myresult = mycursor.fetchall()
+	session.close();
+
+	return myresult;
+	
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
