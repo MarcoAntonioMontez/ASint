@@ -222,22 +222,21 @@ def get_messages_all():
         messages_dict.append(message.get_dict())
     return jsonify({'messages_all': messages_dict})
 
-@app.route('/testestest', methods=['GET'])
-def testar():
-	cnx = mysql.connector.connect(user='root', passwd='123qweASD',
-                              host='35.242.185.194',
-                              database='asintdb'
-    )
-    cursor = cnx.cursor()
+@app.route('/testestest2', methods=['GET'])
+def testar2():
+ cnx = mysql.connector.connect(user='root',
+                                passwd='123qweASD',
+                                host='35.242.185.194',
+                                database='asintdb'
+ )
+ cursor = cnx.cursor()
 
-    query = ("SELECT * FROM users")
+ cursor.execute("SELECT * FROM users")
+ batata = cursor
 
-    cursor.execute(query)
-    batata = cursor
-
-    cursor.close()
-    cnx.close()
-	return batata
+ cursor.close()
+ cnx.close()
+ return jsonify("hello")
     
 @app.errorhandler(404)
 def not_found(error):
