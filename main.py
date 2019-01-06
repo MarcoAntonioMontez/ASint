@@ -93,6 +93,10 @@ def my_redirect():
     
     user_latitude = request.form['latitude']
     user_longitude = request.form['longitude']
+
+    print(user_latitude)
+    print(user_longitude)
+    
     session['user_latitude']=user_latitude
     session['user_longitude']=user_longitude
 
@@ -113,12 +117,18 @@ def callback():
     fenixuser = client.get_user_by_code(tokencode)
     person = client.get_person(fenixuser)
  
-    #user1 = User(person['username'], float(session['user_latitude']), float(session['user_longitude']))
+    username=person['username']
+    
+    #user_latitude=float(session['user_latitude'])
+    #user_longitude=float(session['user_longitude'])
+
+    #user1 = User(username, user_latitude, user_longitude)
     #users.append(user1)
    
     token = fenixuser.access_token
     session['access_token']=token
-    memcache.add(key=person['username'], value=token, time=600)
+    
+    #memcache.add(key=username, value=token, time=600)
     return redirect(url_for('index'))
 
 

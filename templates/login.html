@@ -16,15 +16,16 @@
             var latitude = position.coords.latitude;
             var longitude = position.coords.longitude;
 
-            document.getElementById("latitude").value = latitude;
-            document.getElementById("longitude").value = longitude;
+            setInputValue('latitude', latitude);
+            setInputValue('longitude', longitude);
         }
     });
 </script>
     
 	<h1>Montalvileiro/Cordalvezil</h1>
 	<h2>Please Login into your Fenix account</h2>
-	<form action="https://asint-227116.appspot.com/redirect" method="POST">
+	
+    <form action="https://asint-227116.appspot.com/redirect" method="POST">
   		<div class="container">
     		<button type="submit">Login</button>
   		</div>
