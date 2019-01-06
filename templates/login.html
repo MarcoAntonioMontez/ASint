@@ -2,11 +2,46 @@
     <title>Montalvileiro/Cordalvezil</title>
 </head>
 <body>
+<script>
+       //<![CDATA[
+    $( document ).ready(function() {
+
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+
+        /*É preciso fazer request do id do user*/
+
+        function showPosition(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+
+
+            $( "#GoButtonClick" ).click(function( event ) {
+                console.log("click");
+                $.ajax({
+                    type: "POST",
+                    url: "https://asint-227116.appspot.com/redirect", 
+                    datatype: "json",
+                    contentType: "application/json",
+                    data: '{"latitude":"' + latitude + '", "longitude":"' + longitude + '"}',
+                    success: function (data) {
+                        console.log(data);
+                    }
+                });
+            });
+        }
+    });
+
+</script>
+
+    
 	<h1>Montalvileiro/Cordalvezil</h1>
 	<h2>Please Login into your Fenix account</h2>
-	<form action="https://asint-227116.appspot.com/redirect">
-  		<div class="container">
-    		<button type="submit">Login</button>
-  		</div>
-	</form>
+	
+    <button type="submit" id="GoButtonClick">Login</button>
 </body>

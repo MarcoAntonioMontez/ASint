@@ -32,7 +32,7 @@
 <script>
        //<![CDATA[
     $( document ).ready(function() {            
-        var desturl =  "https://asint-227116.appspot.com/asintproject/users/messages_all";
+        var desturl =  "https://asint-227116.appspot.com/users/messages_all";
         console.log("click");
         $("#divDestiny").html("waiting");
         $.ajax({
@@ -43,7 +43,7 @@
             data: '',
             success: function (data) {
                 console.log(data);
-                var answer = JSON.stringify(data);
+                var answer = JSON.stringify(data, null, '\t');
                 $("#divDestiny").html(answer);
             }
         });
@@ -54,7 +54,6 @@
 
 <h2>Messages:</h2>
     <textarea rows="5" cols="75" id="divDestiny"></textarea>
-    Refresh messages <input type="submit" value="Refresh"  id="SearchButtonClick"/><br>
 
 <form action='sendMessage.html'>
    Send a message <input type="submit" value="Go"  id="GoButtonClick"/><br>

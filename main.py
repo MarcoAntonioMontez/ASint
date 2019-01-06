@@ -130,7 +130,7 @@ def callback():
 def index():
     return render_template('index.html')
 
-@app.route('/asintproject/users', methods=['GET'])
+@app.route('/users', methods=['GET'])
 def get_users():
     return jsonify({'users': users})
 
@@ -143,14 +143,14 @@ def indexHTML():
     return render_template('index.html')
 
 
-@app.route('/asintproject/users/<string:user_id>', methods=['GET'])
+@app.route('/users/<string:user_id>', methods=['GET'])
 def get_user(user_id):
     user = [user for user in users if user['id'] == user_id]
     if len(user) == 0:
         abort(404)
     return jsonify({'user': user[0]})
 
-@app.route('/asintproject/users/nearby/<string:user_id>/<string:radius>', methods=['GET'])
+@app.route('/users/nearby/<string:user_id>/<string:radius>', methods=['GET'])
 def get_user_nearby(user_id,radius):
     radius = float(radius)
     #transform dict list to user list
@@ -168,7 +168,7 @@ def get_user_nearby(user_id,radius):
         abort(404)
     return jsonify({'nearby_users': nearby_users_dict})
 
-@app.route('/asintproject/users/building/<string:building_name>', methods=['GET'])
+@app.route('/users/building/<string:building_name>', methods=['GET'])
 def get_users_in_building(building_name):
     #Falta tirar os acentos dos edificios
     building = get_building(campee_list,building_name)
@@ -187,7 +187,7 @@ def get_users_in_building(building_name):
             user_list.append(user)
     return jsonify({'users': user_list})
 
-@app.route('/asintproject/users', methods=['POST'])
+@app.route('/users', methods=['POST'])
 def create_user():
     if not request.json or not 'id' in request.json or not 'latitude' in request.json or not 'longitude' in request.json:
         abort(400)
@@ -206,7 +206,7 @@ def create_user():
     users.append(user)
     return jsonify({'user': user}), 201
 
-@app.route('/asintproject/users/message', methods=['POST'])
+@app.route('/users/message', methods=['POST'])
 def receive_user_message():
     if not request.json or not 'id' in request.json or not 'message' in request.json or not 'radius' in request.json:
         abort(400)
@@ -223,30 +223,16 @@ def receive_user_message():
 
     return jsonify({'message': message_dict}), 201
 
-@app.route('/asintproject/users/messages_all', methods=['GET'])
+@app.route('/users/messages_all', methods=['GET'])
 def get_messages_all():
     messages_dict=[]
     for message in message_list:
-        messages_dict.append(message.get_dict())
-    return jsonify({'messages_all': messages_dict})
+        msg = message.get_dict()
+        basic_message = ''
+        basic_message = 'Sender ID:' + str(msg['id'])  + ' -> ' + str(msg['message'])
+        messages_dict.append(basic_message)
+    return jsonify(messages_dict)
 
-@app.route('/testestest', methods=['GET'])
-def testar():
-	cnx = mysql.connector.connect(user='root', passwd='123qweASD',
-                              host='35.242.185.194',
-                              database='asintdb'
-    )
-    cursor = cnx.cursor()
-
-    query = ("SELECT * FROM users")
-
-    cursor.execute(query)
-    batata = cursor
-
-    cursor.close()
-    cnx.close()
-	return batata
-    
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
