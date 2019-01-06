@@ -232,21 +232,21 @@ def get_messages_all():
 
 @app.route('/testestest', methods=['GET'])
 def testar():
-	session = mysqlx.get_session({
-		'host': '35.242.185.194',
-		'port': 33060,
-		'user': 'root',
-		'password': '123qweASD'
-	})
-	mycursor = mydb.cursor()
+	cnx = mysql.connector.connect(user='root', passwd='123qweASD',
+                              host='35.242.185.194',
+                              database='asintdb'
+    )
+    cursor = cnx.cursor()
 
-	mycursor.execute("SELECT * FROM asintdb.users")
+    query = ("SELECT * FROM users")
 
-	myresult = mycursor.fetchall()
-	session.close()
+    cursor.execute(query)
+    batata = cursor
 
-	return jsonify({myresult})
-	
+    cursor.close()
+    cnx.close()
+	return batata
+    
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
