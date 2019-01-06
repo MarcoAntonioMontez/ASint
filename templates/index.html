@@ -31,23 +31,22 @@
 <body>
 <script>
        //<![CDATA[
-    $( document ).ready(function() {
-            
-            var desturl =  "https://asint-227116.appspot.com/asintproject/users/messages_all";
-            console.log("click");
-            $("#divDestiny").html("waiting");
-            $.ajax({
-                type: "GET",
-                url: desturl,
-                datatype: "json",
-                contentType: "text/plain",
-                data: '',
-                success: function (data) {
-                    console.log(data);
-                    var answer = JSON.stringify(data);
-                    $("#divDestiny").html(answer);
-                }
-            });
+    $( document ).ready(function() {            
+        var desturl =  "https://asint-227116.appspot.com/asintproject/users/messages_all";
+        console.log("click");
+        $("#divDestiny").html("waiting");
+        $.ajax({
+            type: "GET",
+            url: desturl,
+            datatype: "json",
+            contentType: "text/plain",
+            data: '',
+            success: function (data) {
+                console.log(data);
+                var answer = JSON.stringify(data);
+                $("#divDestiny").html(answer);
+            }
+        });
     });
 </script>
 
