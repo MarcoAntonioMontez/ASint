@@ -52,7 +52,7 @@
                 console.log("click");
                 $.ajax({
                     type: "POST",
-                    url: "https://asint-227116.appspot.com/asintproject/users/message", 
+                    url: "https://asint-227116.appspot.com/users/message", 
                     datatype: "json",
                     contentType: "application/json",
                     data: '{"id":"' + "ist179021" + '", "message":"' + $("#msg_body").val() + '", "radius":"' + $("#msg_radius").val() + '", "latitude":"' + latitude + '", "longitude":"' + longitude + '"}',
@@ -74,8 +74,8 @@
 <h2>Create or Update User</h2>
 
 
-    Message:         <input type="text" name="" size="100" id="msg_body" /><br>
-    Radius:         <input type="number" name="" id="msg_radius" /><br>
+    Message:         <input type="text" required='required' size="100" id="msg_body"/><br>
+    Radius:         <input type="number" required='required' id="msg_radius" required/><br>
 
     <input type="submit" value="Send"  id="sendMsgButtonClick"/><br>
 

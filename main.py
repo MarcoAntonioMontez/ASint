@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify,abort,make_response, redirect, session
+from flask import Flask, render_template, request, jsonify,abort,make_response, redirect, session, url_for
 from requests_oauthlib import OAuth2Session
 import requests
 import urllib3
@@ -107,22 +107,48 @@ def get_user_from_id(user_id):
 
 @app.route('/')
 def home():
-     fenix = OAuth2Session(client_id)
-     authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
-     return redirect(authorization_url)
+     return render_template('login.html')
+
+@app.route('/redirect')
+def my_redirect():
+    
+   # user_latitude = request.json['latitude'],
+   # user_longitude = request.json['longitude']
+   # session['user_latitude']=user_latitude
+   # session['user_longitude']=user_longitude
+
+    fenix = OAuth2Session(client_id)
+    authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
+    return redirect(authorization_url)
 
 @app.route('/callback', methods=["GET"])
 def callback():
+    config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
+    client = fenixedu.FenixEduClient(config)
+    base_url = 'https://fenix.tecnico.ulisboa.pt/'
+    app.secret_key = 'SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw=='
+    client_id='1414440104755257'
+    
     tokencode = request.args.get('code')
-    #obtain access token with post request
-    tokenresponse = requests.post("https://fenix.tecnico.ulisboa.pt/oauth/access_token?client_id=1414440104755257&client_secret=SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw==&redirect_uri=https://asint-227116.appspot.com/callback&code="+tokencode+"&grant_type=authorization_code")
-    #parse json
-    #this is how yout get the access token. you can also obtain 'refresh_token' and 'expires_in' values this way
-    print(tokenresponse.text) 
-    # memcache.add(key="token"+userno, value=tokentext.access_token, time=3600)
+    
+    fenixuser = client.get_user_by_code(tokencode)
+    person = client.get_person(fenixuser)
+    
+    #user1 = user(person['username'], None, None)
+    
+    #users.append(user1)
+    
+    token = fenixuser.access_token
+    print(token)
+    #memcache.add(key="token", value=tokentext.access_token, time=3600)
+    return redirect(url_for('index'))
+
+
+@app.route('/index', methods=["GET"])
+def index():
     return render_template('index.html')
 
-@app.route('/asintproject/users', methods=['GET'])
+@app.route('/users', methods=['GET'])
 def get_users():
     return jsonify({'users': users})
 
@@ -135,14 +161,14 @@ def indexHTML():
     return render_template('index.html')
 
 
-@app.route('/asintproject/users/<string:user_id>', methods=['GET'])
+@app.route('/users/<string:user_id>', methods=['GET'])
 def get_user(user_id):
     user = [user for user in users if user['id'] == user_id]
     if len(user) == 0:
         abort(404)
     return jsonify({'user': user[0]})
 
-@app.route('/asintproject/users/nearby/<string:user_id>/<string:radius>', methods=['GET'])
+@app.route('/users/nearby/<string:user_id>/<string:radius>', methods=['GET'])
 def get_user_nearby(user_id,radius):
     radius = float(radius)
     #transform dict list to user list
@@ -160,7 +186,7 @@ def get_user_nearby(user_id,radius):
         abort(404)
     return jsonify({'nearby_users': nearby_users_dict})
 
-@app.route('/asintproject/users/building/<string:building_name>', methods=['GET'])
+@app.route('/users/building/<string:building_name>', methods=['GET'])
 def get_users_in_building(building_name):
     #Falta tirar os acentos dos edificios
     building = get_building(campee_list,building_name)
@@ -179,7 +205,7 @@ def get_users_in_building(building_name):
             user_list.append(user)
     return jsonify({'users': user_list})
 
-@app.route('/asintproject/users', methods=['POST'])
+@app.route('/users', methods=['POST'])
 def create_user():
     if not request.json or not 'id' in request.json or not 'latitude' in request.json or not 'longitude' in request.json:
         abort(400)
@@ -198,7 +224,7 @@ def create_user():
     users.append(user)
     return jsonify({'user': user}), 201
 
-@app.route('/asintproject/users/message', methods=['POST'])
+@app.route('/users/message', methods=['POST'])
 def receive_user_message():
     if not request.json or not 'id' in request.json or not 'message' in request.json or not 'radius' in request.json:
         abort(400)
@@ -215,12 +241,15 @@ def receive_user_message():
 
     return jsonify({'message': message_dict}), 201
 
-@app.route('/asintproject/users/messages_all', methods=['GET'])
+@app.route('/users/messages_all', methods=['GET'])
 def get_messages_all():
     messages_dict=[]
     for message in message_list:
-        messages_dict.append(message.get_dict())
-    return jsonify({'messages_all': messages_dict})
+        msg = message.get_dict()
+        basic_message = ''
+        basic_message = 'Sender ID:' + str(msg['id'])  + ' -> ' + str(msg['message'])
+        messages_dict.append(basic_message)
+    return jsonify(messages_dict)
 
 @app.route('/testestest2', methods=['GET'])
 def testar2():
@@ -237,7 +266,7 @@ def testar2():
  cursor.close()
  cnx.close()
  return jsonify("hello")
-    
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
