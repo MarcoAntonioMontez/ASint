@@ -35,12 +35,12 @@ buildingUrls.append(ur1)
 buildingUrls.append(ur2)
 buildingUrls.append(ur3)
 
-import MySQLdb
+#import MySQLdb
 
-connection = MySQLdb.connect (host = "localhost",
-                              user = "testuser",
-                              passwd = "testpass",
-                              db = "company")
+#connection = MySQLdb.connect (host = "localhost",
+#                              user = "testuser",
+#                              passwd = "testpass",
+#                              db = "company")
 
 ##Init de users para debug
 users = [
@@ -121,9 +121,8 @@ def callback():
     #obtain access token with post request
     tokenresponse = requests.post("https://fenix.tecnico.ulisboa.pt/oauth/access_token?client_id=1414440104755257&client_secret=SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw==&redirect_uri=https://asint-227116.appspot.com/callback&code="+tokencode+"&grant_type=authorization_code")
     #parse json
-    tokentext = json.loads(tokenresponse.text)
     #this is how yout get the access token. you can also obtain 'refresh_token' and 'expires_in' values this way
-    #print(tokentext['access_token']) 
+    print(tokenresponse.text) 
     # memcache.add(key="token"+userno, value=tokentext.access_token, time=3600)
     return render_template('index.html')
 
