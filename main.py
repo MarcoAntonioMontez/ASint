@@ -223,7 +223,7 @@ def get_messages_all():
     return jsonify({'messages_all': messages_dict})
 
 @app.route('/testestest', methods=['GET'])
-def testar();
+def testar():
 	session = mysqlx.get_session({
 		'host': '35.242.185.194',
 		'port': 33060,
@@ -236,9 +236,9 @@ def testar();
 	mycursor.execute("SELECT * FROM users")
 
 	myresult = mycursor.fetchall()
-	session.close();
+	session.close()
 
-	return myresult;
+	return myresult
 	
 @app.errorhandler(404)
 def not_found(error):
