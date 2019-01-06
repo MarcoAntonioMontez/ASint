@@ -109,22 +109,40 @@ def get_user_from_id(user_id):
 def home():
      return render_template('login.html')
 
-@app.route('/redirect')
+@app.route('/redirect', methods=["POST"])
 def my_redirect():
-     fenix = OAuth2Session(client_id)
-     authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
-     return redirect(authorization_url)
+    
+    user_latitude = request.json['latitude'],
+    user_longitude = request.json['longitude']
+    session['user_latitude']=user_latitude
+    session['user_longitude']=user_longitude
+
+    fenix = OAuth2Session(client_id)
+    authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
+    return redirect(authorization_url)
 
 @app.route('/callback', methods=["GET"])
 def callback():
+    config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
+    client = fenixedu.FenixEduClient(config)
+    base_url = 'https://fenix.tecnico.ulisboa.pt/'
+    app.secret_key = 'SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw=='
+    client_id='1414440104755257'
+    
     tokencode = request.args.get('code')
-    #obtain access token with post request
-    tokenresponse = requests.post("https://fenix.tecnico.ulisboa.pt/oauth/access_token?client_id=1414440104755257&client_secret=SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw==&redirect_uri=https://asint-227116.appspot.com/callback&code="+tokencode+"&grant_type=authorization_code")
-    #this is how yout get the access token. you can also obtain 'refresh_token' and 'expires_in' values this way
-    #give token to client and store in memcache
-    print(tokenresponse.text) 
-    # memcache.add(key="token"+userno, value=tokentext.access_token, time=3600)
+    
+    fenixuser = client.get_user_by_code(tokencode)
+    person = client.get_person(fenixuser)
+    
+    #user1 = user(person['username'], None, None)
+    
+    #users.append(user1)
+    
+    token = fenixuser.access_token
+    print(token)
+    #memcache.add(key="token", value=tokentext.access_token, time=3600)
     return redirect(url_for('index'))
+
 
 @app.route('/index', methods=["GET"])
 def index():
