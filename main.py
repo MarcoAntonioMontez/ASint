@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify,abort,make_response, redirect, session
+from flask import Flask, render_template, request, jsonify,abort,make_response, redirect, session, url_for
 from requests_oauthlib import OAuth2Session
 import requests
 import urllib3
@@ -107,6 +107,10 @@ def get_user_from_id(user_id):
 
 @app.route('/')
 def home():
+     return render_template('login.html')
+
+@app.route('/redirect')
+def my_redirect():
      fenix = OAuth2Session(client_id)
      authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
      return redirect(authorization_url)
@@ -116,10 +120,14 @@ def callback():
     tokencode = request.args.get('code')
     #obtain access token with post request
     tokenresponse = requests.post("https://fenix.tecnico.ulisboa.pt/oauth/access_token?client_id=1414440104755257&client_secret=SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw==&redirect_uri=https://asint-227116.appspot.com/callback&code="+tokencode+"&grant_type=authorization_code")
-    #parse json
     #this is how yout get the access token. you can also obtain 'refresh_token' and 'expires_in' values this way
+    #give token to client and store in memcache
     print(tokenresponse.text) 
     # memcache.add(key="token"+userno, value=tokentext.access_token, time=3600)
+    return redirect(url_for('index'))
+
+@app.route('/index', methods=["GET"])
+def index():
     return render_template('index.html')
 
 @app.route('/asintproject/users', methods=['GET'])
