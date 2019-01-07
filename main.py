@@ -50,8 +50,6 @@ buildingUrls.append(ur3)
 
 ##Init de users para debug
 users = []
-move_list = []
-campeeList = []
 message_list = []
 
 unix_socket = '/cloudsql/{}'.format(db_connection_name)
@@ -245,16 +243,6 @@ def create_user():
             if user['id'] == existing_user['id']:
                 if getDistance(float(existing_user['latitude']), float(existing_user['longitude']), float(user['latitude']), float(user['longitude']))>1:
                     #Create Move
-                    move = {
-                        'id': user["id"],
-                        'old_latitude': existing_user['latitude'],
-                        'old_longitude': existing_user['longitude'],
-                        'new_latitude': user["latitude"],
-                        'new_longitude': user['longitude'],
-                    }
-                    move_list.append(move)
-                    existing_user['latitude'] = user['latitude']
-                    existing_user['longitude'] = user['longitude']
                     cnx = get_connection()
                     with cnx.cursor() as cursor:
                         sql = "INSERT INTO user_move (user_id, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s);"
