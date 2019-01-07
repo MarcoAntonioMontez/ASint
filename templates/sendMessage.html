@@ -30,9 +30,14 @@
 
 <body>
 <script>
-       //<![CDATA[
-    $( document ).ready(function() {
+    
+    function getCookieValue(a) {
+        var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+        return b ? b.pop() : '';
+    }
 
+    $( document ).ready(function() {
+        
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition);
@@ -46,7 +51,7 @@
         function showPosition(position) {
             var latitude = position.coords.latitude;
             var longitude = position.coords.longitude;
-
+            var username = getCookieValue('username');
 
             $( "#sendMsgButtonClick" ).click(function( event ) {
                 console.log("click");
@@ -55,7 +60,7 @@
                     url: "https://asint-227116.appspot.com/users/message", 
                     datatype: "json",
                     contentType: "application/json",
-                    data: '{"id":"' + "ist179021" + '", "message":"' + $("#msg_body").val() + '", "radius":"' + $("#msg_radius").val() + '", "latitude":"' + latitude + '", "longitude":"' + longitude + '"}',
+                    data: '{"id":"' + username + '", "message":"' + $("#msg_body").val() + '", "radius":"' + $("#msg_radius").val() + '", "latitude":"' + latitude + '", "longitude":"' + longitude + '"}',
                     success: function (data) {
                         //alert('successful');
                         console.log(data);
