@@ -100,8 +100,8 @@ def checkToken(token, username):
     else:
         return False
 
-def getDistance(lat1, lon1, lat2, lon2):
-    # approximate radius of earth in km
+def getDistance(lat1, lon1, lat2, lon2): 
+    # approximate radius of earth in meters
     R = 6373000.0
     lat1=radians(lat1)
     lon1=radians(lon1)
@@ -157,11 +157,9 @@ def callback():
     #escreve username-token na memcache REDIS, expirando depois de 10 minutos
     redis_client.set(username, token, 600)
 
-
     if(not checkToken(session['access_token'], session['username'])):
         authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
         return redirect(authorization_url)
-    
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('username', username)
