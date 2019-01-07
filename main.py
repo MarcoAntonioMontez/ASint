@@ -222,7 +222,7 @@ def create_user():
             'latitude': request.json['latitude'],
             'longitude': request.json['longitude']
         }
-
+#----------------------------------------------------------------------------------------------------------------------
         cnx = get_connection()
         with cnx.cursor() as cursor:
             sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
@@ -240,8 +240,8 @@ def create_user():
                 sql = "UPDATE users SET user_latitude = %s, user_longitude = %s WHERE user_id = %s;"
                 cursor.execute(sql, (request.json['latitude'], request.json['longitude'], request.json['id']))
         cnx.close()
+#----------------------------------------------------------------------------------------------------------------------        
         for existing_user in users:
-
             if user['id'] == existing_user['id']:
                 if getDistance(float(existing_user['latitude']), float(existing_user['longitude']), float(user['latitude']), float(user['longitude']))>1:
                     #Create Move
@@ -318,7 +318,7 @@ def get_nearby_users():
     else:
         this_user = None
         json_to_send = None
-<<<<<<< HEAD
+        
         for user in users:
             if user['id'] == session['username']:
                 this_user = user
