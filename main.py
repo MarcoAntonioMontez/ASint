@@ -259,7 +259,7 @@ def get_messages_all():
     else:
         json_to_send = None
         #this_user = [user for user in users if user['id'] == session['username']]
-        print(this_user)
+        #print(this_user)
         for message in message_list:
             data = {}
             msg = message.get_dict()
