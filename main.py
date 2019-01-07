@@ -156,7 +156,7 @@ def callback():
         return redirect(authorization_url)
 
     resp = make_response(redirect(url_for('index')))
-    resp.set_cookie('username', username, secure=True)
+    resp.set_cookie('username', username, secure=True)  #accessible in javascript
     return resp 
 
 @app.route('/index', methods=["GET"])
@@ -191,10 +191,12 @@ def indexHTML():
 
 @app.route('/logout')
 def logout():
+    resp = make_response(redirect(url_for('login')))
     if(checkToken(session['access_token'], session['username'])):
+        resp.set_cookie('username', expires=0) 
         redis_client.delete(session['username'])
         session.pop('username')
-    return redirect(url_for('login'))
+    return resp
 
 
 @app.route('/users', methods=['POST'])
