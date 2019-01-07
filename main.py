@@ -255,6 +255,11 @@ def create_user():
                     move_list.append(move)
                     existing_user['latitude'] = user['latitude']
                     existing_user['longitude'] = user['longitude']
+                    cnx = get_connection()
+                    with cnx.cursor() as cursor:
+                        sql = "INSERT INTO user_move (user_id, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s);"
+                        cursor.execute(sql, (request.json['id'], existing_user['latitude'], existing_user['longitude'], request.json['latitude'], request.json['longitude']))
+                    cnx.close()
                 return jsonify({'existing_user': existing_user}), 201
 
         users.append(user)
