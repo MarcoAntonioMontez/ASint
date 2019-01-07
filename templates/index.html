@@ -31,7 +31,7 @@
 <body>
 
 
-<h1>Index</h1>
+<h1>Welcome!</h1>
 
 <h2>Messages:</h2>
     <textarea rows="5" cols="75" id="divDestiny"></textarea>
@@ -40,10 +40,39 @@
    Send a new message <input type="submit" value="&#8594;"  id="GoButtonClick"/><br>
 </form>
 <script>
+    function getCookieValue(a) {
+        var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+        return b ? b.pop() : '';
+    }
+    
+    function showPosition(position) {
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
+        var username = getCookieValue('username');
+
+        $.ajax({
+            type: "POST",
+            url: "https://asint-227116.appspot.com/users", 
+            datatype: "json",
+            contentType: "application/json",
+            data: '{"id":"' + username + '", "latitude":"' + latitude + '", "longitude":"' + longitude + '"}',
+            success: function (data) {
+                console.log(data);
+            }
+        });
+    }
+    
     ReadMessages();
     setInterval(ReadMessages, 3000);
     function ReadMessages() {
-        $( document ).ready(function() {            
+        $( document ).ready(function() {    
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+                    
             var desturl =  "https://asint-227116.appspot.com/users/messages_all";
             $("#divDestiny").html("waiting");
             $.ajax({
