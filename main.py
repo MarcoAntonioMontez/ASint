@@ -102,7 +102,7 @@ def checkToken(token, username):
 
 def getDistance(lat1, lon1, lat2, lon2):
     # approximate radius of earth in km
-    R = 6373000
+    R = 6373000.0
     lat1=radians(lat1)
     lon1=radians(long1)
     lat2=radians(lat2)
@@ -115,7 +115,6 @@ def getDistance(lat1, lon1, lat2, lon2):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     distance = R * c
-    
     
     #distance between 1 and 2 in meters
     return distance
