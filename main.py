@@ -23,7 +23,6 @@ client = fenixedu.FenixEduClient(config)
 
 base_url = 'https://fenix.tecnico.ulisboa.pt/'
 
-
 db_user = os.environ.get('CLOUD_SQL_USERNAME')
 db_password = os.environ.get('CLOUD_SQL_PASSWORD')
 db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
@@ -49,6 +48,7 @@ buildingUrls.append(ur3)
 
 ##Init de users para debug
 users = []
+move_list = []
 campeeList = []
 message_list = []
 
@@ -57,7 +57,6 @@ unix_socket = '/cloudsql/{}'.format(db_connection_name)
 with open('ISTCampee_formated.data', 'rb') as filehandle:
     # read the data as binary data stream
     campee_list = pickle.load(filehandle)
-
 
 ##Print Campee list
 # print("\nNumber of campee: "+ str(len(campee_list)))
@@ -119,7 +118,6 @@ def getDistance(lat1, lon1, lat2, lon2):
     #distance between 1 and 2 in meters
     return distance
 
-
 @app.route('/')
 def login():
      return render_template('login.html')
@@ -143,12 +141,6 @@ def callback():
     person = client.get_person(fenixuser)
  
     username=person['username']
-    
-    #user_latitude=float(session['user_latitude'])
-    #user_longitude=float(session['user_longitude'])
-
-    #user1 = User(username, user_latitude, user_longitude)
-    #users.append(user1)
    
     token = fenixuser.access_token
     session['access_token']=token
@@ -157,19 +149,13 @@ def callback():
     #escreve username-token na memcache REDIS, expirando depois de 10 minutos
     redis_client.set(username, token, 600)
 
-
     if(not checkToken(session['access_token'], session['username'])):
         authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
-        return redirect(authorization_url)
-    
+        return redirect(authorization_url)    
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('username', username)
     return resp 
-    
-
-
-        
 
 @app.route('/index', methods=["GET"])
 def index():
@@ -209,6 +195,98 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/users', methods=['POST'])
+def create_user():
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        if not request.json or not 'id' in request.json or not 'latitude' in request.json or not 'longitude' in request.json:
+            abort(400)
+        user = {
+            'id': request.json['id'],
+            'latitude': request.json['latitude'],
+            'longitude': request.json['longitude']
+        }
+
+        for existing_user in users:
+            if user["id"] == existing_user["id"]:
+                if existing_user["latitude"] != user["latitude"] or existing_user["longitude"] != user["longitude"]:
+                    #Create Move
+                    move = {
+                        'id': user["id"],
+                        'old_latitude': existing_user["latitude"],
+                        'old_longitude': existing_user["longitude"],
+                        'new_latitude': user["latitude"],
+                        'new_longitude': user["longitude"],
+                    }
+                    move_list.append(move)
+                    existing_user["latitude"] = user["latitude"]
+                    existing_user["longitude"] = user["longitude"]
+                return jsonify({'existing_user': existing_user}), 201
+
+        users.append(user)
+        return jsonify({'user': user}), 201
+
+@app.route('/users/message', methods=['POST'])
+def receive_user_message():
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        if not request.json or not 'id' in request.json or not 'message' in request.json or not 'radius' in request.json:
+            abort(400)
+        message_dict = {
+            'id': request.json['id'],
+            'message': request.json['message'],
+            'radius': request.json['radius'],
+            'latitude': request.json['latitude'],
+            'longitude': request.json['longitude']
+        }
+
+        message = Message(message_dict)
+        message_list.append(message)
+
+        return jsonify({'message': message_dict}), 201
+
+@app.route('/users/messages_all', methods=['GET'])
+def get_messages_all():
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        json_to_send = None
+        this_user = [user for user in users if user['id'] == session['username']]
+        print(this_user)
+        for message in message_list:
+            data = {}
+            msg = message.get_dict()
+            
+            if getDistance(this_user['latitude'], this_user['longitude'], msg['latitude'], msg['longitude']) <= msg['radius']:                
+                data['id'] = str(msg['id'])
+                data['message'] = str(msg['message'])
+                json_data = json.dumps(data)
+                if(json_to_send == None):
+                    json_to_send = json_data
+                else:
+                    json_to_send = json_to_send + "," + json_data 
+                         
+        return jsonify(json_to_send)
+
+@app.route('/testestest2', methods=['GET'])
+def testar2():
+ current_time = ""
+ if(not checkToken(session['access_token'], session['username'])):
+    abort(403)
+ else:
+  cnx = pymysql.connect(user=db_user, password=db_password,
+                              unix_socket=unix_socket, db=db_name)
+  with cnx.cursor() as cursor:
+   cursor.execute('SELECT * FROM users;')
+   result = cursor.fetchall()
+   current_time = result[0][0]
+  cnx.close()
+
+ return str(current_time)
+
+#----------------------------------------------------------------------------------------------------#
 @app.route('/users/<string:user_id>', methods=['GET'])
 def get_user(user_id):
     if(not checkToken(session['access_token'], session['username'])):
@@ -261,83 +339,7 @@ def get_users_in_building(building_name):
             if range.is_in_range(u_lat,u_long,lat,long,rad):
                 user_list.append(user)
         return jsonify({'users': user_list})
-
-@app.route('/users', methods=['POST'])
-def create_user():
-    if(not checkToken(session['access_token'], session['username'])):
-        abort(403)
-    else:
-        if not request.json or not 'id' in request.json or not 'latitude' in request.json or not 'longitude' in request.json:
-            abort(400)
-        user = {
-            'id': request.json['id'],
-            'latitude': request.json['latitude'],
-            'longitude': request.json['longitude']
-        }
-
-        for existing_user in users:
-            if user["id"] == existing_user["id"]:
-                existing_user["latitude"] = user["latitude"]
-                existing_user["longitude"] = user["longitude"]
-                return jsonify({'existing_user': existing_user}), 201
-
-        users.append(user)
-        return jsonify({'user': user}), 201
-
-@app.route('/users/message', methods=['POST'])
-def receive_user_message():
-    if(not checkToken(session['access_token'], session['username'])):
-        abort(403)
-    else:
-        if not request.json or not 'id' in request.json or not 'message' in request.json or not 'radius' in request.json:
-            abort(400)
-        message_dict = {
-            'id': request.json['id'],
-            'message': request.json['message'],
-            'radius': request.json['radius'],
-            'latitude': request.json['latitude'],
-            'longitude': request.json['longitude']
-        }
-
-        message = Message(message_dict)
-        message_list.append(message)
-
-        return jsonify({'message': message_dict}), 201
-
-@app.route('/users/messages_all', methods=['GET'])
-def get_messages_all():
-    if(not checkToken(session['access_token'], session['username'])):
-        abort(403)
-    else:
-        json_to_send = None
-        for message in message_list:
-            data = {}
-            msg = message.get_dict()
-            data['id'] = str(msg['id'])
-            data['message'] = str(msg['message'])
-            json_data = json.dumps(data)
-            if(json_to_send == None):
-                json_to_send = json_data
-            else:
-                json_to_send = json_to_send + "," + json_data      
-        return jsonify(json_to_send)
-
-@app.route('/testestest2', methods=['GET'])
-def testar2():
- current_time = ""
- if(not checkToken(session['access_token'], session['username'])):
-    abort(403)
- else:
-  cnx = pymysql.connect(user=db_user, password=db_password,
-                              unix_socket=unix_socket, db=db_name)
-  with cnx.cursor() as cursor:
-   cursor.execute('SELECT * FROM users;')
-   result = cursor.fetchall()
-   current_time = result[0][0]
-  cnx.close()
-
- return str(current_time)
-
+#--------------------------------------------------------------------------------------------------#
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
@@ -351,33 +353,6 @@ def forbidden(error):
     return make_response(jsonify({'error': 'Forbidden'}), 403)
 
 
-
 if __name__ == '__main__':
     app.debug = True
     app.run(host='127.0.0.1', port=8080)
-
-
-#Get
-#  curl -i http://localhost:5000/asintproject/users
-#  curl -i http://localhost:5000/asintproject/users/ist178508
-
-#  curl -i http://localhost:5000/asintproject/users/building/Biblioteca
-#  curl -i http://localhost:5000/asintproject/users/building/PavilhaodeCivil
-#  curl -i http://localhost:5000/asintproject/users/building/TorreNorte
-
-#  curl -i http://localhost:5000/asintproject/users/nearby/ist178508/10
-
-
-
-
-#POST
-#curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "latitude":"30" , "longitude":"40"}' http://localhost:5000/asintproject/users
-
-#curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "latitude":"38.811978" , "longitude":"-9.094261"}' http://localhost:5000/asintproject/users
-
-
-#Enviar Menssagem
-#curl -i -H "Content-Type: application/json" -X POST -d '{"id":"ist169699", "message":"Hello this is a message", "radius":"10", "latitude":"38.811978" , "longitude":"-9.094261"}' http://localhost:5000/asintproject/users/message
-
-#Ver Log de mensagens
-#curl -i http://localhost:5000/asintproject/users/messages_all
