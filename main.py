@@ -155,7 +155,6 @@ def callback():
         authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
         return redirect(authorization_url)
 
-
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('username', username, secure=True)
     return resp 
@@ -212,19 +211,20 @@ def create_user():
         }
 
         for existing_user in users:
-            if user["id"] == existing_user["id"]:
-                if existing_user["latitude"] != user["latitude"] or existing_user["longitude"] != user["longitude"]:
+
+            if user['id'] == existing_user['id']:
+                if getDistance(float(existing_user['latitude']), float(existing_user['longitude']), float(user['latitude']), float(user['longitude']))>1:
                     #Create Move
                     move = {
                         'id': user["id"],
-                        'old_latitude': existing_user["latitude"],
-                        'old_longitude': existing_user["longitude"],
+                        'old_latitude': existing_user['latitude'],
+                        'old_longitude': existing_user['longitude'],
                         'new_latitude': user["latitude"],
-                        'new_longitude': user["longitude"],
+                        'new_longitude': user['longitude'],
                     }
                     move_list.append(move)
-                    existing_user["latitude"] = user["latitude"]
-                    existing_user["longitude"] = user["longitude"]
+                    existing_user['latitude'] = user['latitude']
+                    existing_user['longitude'] = user['longitude']
                 return jsonify({'existing_user': existing_user}), 201
 
         users.append(user)
@@ -256,21 +256,27 @@ def get_messages_all():
         abort(403)
     else:
         json_to_send = None
-        
+        #this_user = [user for user in users if user['id'] == session['username']]
         print(this_user)
         for message in message_list:
             data = {}
             msg = message.get_dict()
-            
-            
-        data['id'] = str(msg['id'])
-        data['message'] = str(msg['message'])
-        json_data = json.dumps(data)
-        if(json_to_send == None):
-            json_to_send = json_data
-        else:
-            json_to_send = json_to_send + "," + json_data 
-                        
+
+            other_user = [user for user in users if user['id'] == msg['id']]
+            #print(other_user)
+            #print(float(this_user['latitude']))
+            #print(float(this_user['longitude']))
+            #print(float(other_user['latitude']))
+            #print(float(other_user['longitude']))
+            #if getDistance(float(this_user['latitude']), float(this_user['longitude']), float(other_user['latitude']), float(other_user['longitude'])) <= float(msg['radius']):              
+            data['id'] = str(msg['id'])
+            data['message'] = str(msg['message'])
+            json_data = json.dumps(data)
+            if(json_to_send == None):
+                json_to_send = json_data
+            else:
+                json_to_send = json_to_send + "," + json_data 
+                         
         return jsonify(json_to_send)
 
 @app.route('/testestest2', methods=['GET'])
