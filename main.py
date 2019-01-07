@@ -171,9 +171,6 @@ def index():
 
 @app.route('/users', methods=['GET'])
 def get_users():
-    if((not checkToken(session['access_token'], session['username']) and request.args.get('admin')!='69'):
-        abort(403)
-    else:
         return jsonify({'users': users})
 
 @app.route('/sendMessage.html')
