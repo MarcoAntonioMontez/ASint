@@ -22,7 +22,7 @@ create table logs
 	 foreign key(user_id) references users(user_id));
 
 create table user_move
-	(move_id	int not null unique,
+	(move_id 	int NOT NULL AUTO_INCREMENT,
 	 user_id	varchar(20) not null unique,
 	 move_time datetime,
 	 old_latitude	float(15) not null,
@@ -33,7 +33,7 @@ create table user_move
 	 foreign key(user_id) references users(user_id));
 
 create table user_msg
-	(msg_id 		int NOT NULL AUTO_INCREMENT,
+	(msg_id 	int NOT NULL AUTO_INCREMENT,
 	 user_id	varchar(20) not null unique,
 	 msg_time datetime,
 	 msg_body varchar(200) not null,
