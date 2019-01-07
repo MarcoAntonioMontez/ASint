@@ -104,7 +104,7 @@ def getDistance(lat1, lon1, lat2, lon2):
     # approximate radius of earth in km
     R = 6373000.0
     lat1=radians(lat1)
-    lon1=radians(long1)
+    lon1=radians(lon1)
     lat2=radians(lat2)
     lon2=radians(lon2)  
 
