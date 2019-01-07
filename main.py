@@ -89,8 +89,7 @@ def checkToken(token, username):
     if redis_client.get(username)==token:
         return True
     else:
-        authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
-        return redirect(authorization_url)
+        return False
         
 
 @app.route('/')
@@ -99,8 +98,6 @@ def home():
 
 @app.route('/redirect', methods=["POST"])
 def my_redirect():
-
-    fenix = OAuth2Session(client_id)
     authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
     return redirect(authorization_url)
 
@@ -132,7 +129,10 @@ def callback():
     #escreve username-token na memcache REDIS, expirando depois de 10 minutos
     redis_client.set(username, token, 600)
 
-    print(checkToken(session['access_token'], session['username']))
+
+    if(not checkToken(session['access_token'], session['username'])):
+        authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
+        return redirect(authorization_url)
     
     return redirect(url_for('index'))
 
