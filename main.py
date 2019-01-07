@@ -50,8 +50,6 @@ buildingUrls.append(ur3)
 
 ##Init de users para debug
 users = []
-move_list = []
-campeeList = []
 message_list = []
 
 unix_socket = '/cloudsql/{}'.format(db_connection_name)
@@ -222,7 +220,7 @@ def create_user():
             'latitude': request.json['latitude'],
             'longitude': request.json['longitude']
         }
-
+#----------------------------------------------------------------------------------------------------------------------
         cnx = get_connection()
         with cnx.cursor() as cursor:
             sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
@@ -240,21 +238,16 @@ def create_user():
                 sql = "UPDATE users SET user_latitude = %s, user_longitude = %s WHERE user_id = %s;"
                 cursor.execute(sql, (request.json['latitude'], request.json['longitude'], request.json['id']))
         cnx.close()
+#----------------------------------------------------------------------------------------------------------------------        
         for existing_user in users:
-
             if user['id'] == existing_user['id']:
                 if getDistance(float(existing_user['latitude']), float(existing_user['longitude']), float(user['latitude']), float(user['longitude']))>1:
                     #Create Move
-                    move = {
-                        'id': user["id"],
-                        'old_latitude': existing_user['latitude'],
-                        'old_longitude': existing_user['longitude'],
-                        'new_latitude': user["latitude"],
-                        'new_longitude': user['longitude'],
-                    }
-                    move_list.append(move)
-                    existing_user['latitude'] = user['latitude']
-                    existing_user['longitude'] = user['longitude']
+                    cnx = get_connection()
+                    with cnx.cursor() as cursor:
+                        sql = "INSERT INTO user_move (user_id, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s);"
+                        cursor.execute(sql, (request.json['id'], existing_user['latitude'], existing_user['longitude'], request.json['latitude'], request.json['longitude']))
+                    cnx.close()
                 return jsonify({'existing_user': existing_user}), 201
 
         users.append(user)
@@ -318,7 +311,7 @@ def get_nearby_users():
     else:
         this_user = None
         json_to_send = None
-<<<<<<< HEAD
+        
         for user in users:
             if user['id'] == session['username']:
                 this_user = user
