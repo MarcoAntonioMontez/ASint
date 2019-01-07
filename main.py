@@ -170,7 +170,13 @@ def index():
 
 @app.route('/users', methods=['GET'])
 def get_users():
-        return jsonify({'users': users})
+    cnx = get_connection()
+    with cnx.cursor() as cursor:
+        sql = "SELECT user_id FROM users;"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    cnx.close()
+    return jsonify(result)
 
 @app.route('/sendMessage.html')
 def sendMessage():
