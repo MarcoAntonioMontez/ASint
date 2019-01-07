@@ -13,16 +13,17 @@ import utils
 from message import Message
 from flask_cors import CORS
 import fenixedu
-import mysql.connector
+import bmemcached
 
 config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
 client = fenixedu.FenixEduClient(config)
 
 base_url = 'https://fenix.tecnico.ulisboa.pt/'
 
-
 app = Flask(__name__)
 CORS(app)
+
+redis_client = bmemcached.Client('memcached-18466.c3.eu-west-1-1.ec2.cloud.redislabs.com:18466', 'mc-KBY4m', 'otaT9lPXY9e3ppBnemshXeyIIvhBlAGL')
 
 app.secret_key = 'SfPsJpv6wJTod6avb03fIjOKrzAMqH2H8gCyWklysIXU46CblYpcIdTZ6QNZLoAv1FX4JWgqGM2ed3Gp9jMoGw=='
 client_id='1414440104755257'
@@ -84,6 +85,14 @@ def get_user_from_id(user_id):
     user = [user for user in users if user['id'] == user_id]
     return user[0]
 
+def checkToken(token, username):
+    if redis_client.get(username)==token:
+        return True
+    else:
+        authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
+        return redirect(authorization_url)
+        
+
 @app.route('/')
 def home():
      return render_template('login.html')
@@ -118,10 +127,17 @@ def callback():
    
     token = fenixuser.access_token
     session['access_token']=token
+    session['username']=username
     
-    #memcache.add(key=username, value=token, time=600)
+    #escreve username-token na memcache REDIS, expirando depois de 10 minutos
+    redis_client.set(username, token, 600)
+
+    print(checkToken(session['access_token'], session['username']))
+    
     return redirect(url_for('index'))
 
+
+        
 
 @app.route('/index', methods=["GET"])
 def index():
