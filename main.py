@@ -90,15 +90,6 @@ def home():
 
 @app.route('/redirect', methods=["POST"])
 def my_redirect():
-    
-    user_latitude = request.form['latitude']
-    user_longitude = request.form['longitude']
-
-    print(user_latitude)
-    print(user_longitude)
-    
-    session['user_latitude']=user_latitude
-    session['user_longitude']=user_longitude
 
     fenix = OAuth2Session(client_id)
     authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'

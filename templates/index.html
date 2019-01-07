@@ -45,8 +45,17 @@
                 data: '',
                 success: function (data) {
                     console.log(data);
-                    var answer = JSON.stringify(data, null, '\t');
-                    $("#divDestiny").html(answer);
+                    
+                    if(data == null || data=="[]")
+                        $("#divDestiny").html("No new messages");
+                    else{
+                        var answer = JSON.parse(data);
+                        var messages = "";
+                        for (var i = 0; i < answer.length; i++) {
+                            messages += answer[i] + "\n";
+                        }
+                        $("#divDestiny").html(messages);
+                    }
                 }
             });
         });
