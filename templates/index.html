@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <title>Index</title>
-    <meta http-equiv="refresh" content="5">
+
     <style type="text/css">
     </style>
    <link rel="stylesheet" href="static/jquery-ui.css"> </link>
@@ -31,23 +31,26 @@
 <body>
 <script>
        //<![CDATA[
-    $( document ).ready(function() {            
-        var desturl =  "https://asint-227116.appspot.com/users/messages_all";
-        console.log("click");
-        $("#divDestiny").html("waiting");
-        $.ajax({
-            type: "GET",
-            url: desturl,
-            datatype: "json",
-            contentType: "text/plain",
-            data: '',
-            success: function (data) {
-                console.log(data);
-                var answer = JSON.stringify(data, null, '\t');
-                $("#divDestiny").html(answer);
-            }
+       setInterval(ReadMessages, 3000);
+    function ReadMessages() {
+        $( document ).ready(function() {            
+            var desturl =  "https://asint-227116.appspot.com/users/messages_all";
+            console.log("click");
+            $("#divDestiny").html("waiting");
+            $.ajax({
+                type: "GET",
+                url: desturl,
+                datatype: "json",
+                contentType: "text/plain",
+                data: '',
+                success: function (data) {
+                    console.log(data);
+                    var answer = JSON.stringify(data, null, '\t');
+                    $("#divDestiny").html(answer);
+                }
+            });
         });
-    });
+    }
 </script>
 
 <h1>Index</h1>
