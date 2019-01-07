@@ -50,7 +50,6 @@ buildingUrls.append(ur3)
 
 ##Init de users para debug
 users = []
-message_list = []
 
 unix_socket = '/cloudsql/{}'.format(db_connection_name)
 
@@ -262,18 +261,15 @@ def receive_user_message():
     else:
         if not request.json or not 'id' in request.json or not 'message' in request.json or not 'radius' in request.json:
             abort(400)
-        message_dict = {
-            'id': request.json['id'],
-            'message': request.json['message'],
-            'radius': request.json['radius'],
-            'latitude': request.json['latitude'],
-            'longitude': request.json['longitude']
-        }
+        
+        json_to_send = None
+        cnx = get_connection()
+        with cnx.cursor() as cursor:
+            sql = "INSERT INTO user_msg (user_id, msg_body, latitude, longitude, radius) VALUES (%s, %s, %s, %s, %s);"
+            cursor.execute(sql, (request.json['id'], request.json['message'], request.json['latitude'], request.json['longitude'], request.json['radius']))
+        cnx.close()
 
-        message = Message(message_dict)
-        message_list.append(message)
-
-        return jsonify({'message': message_dict}), 201
+        return jsonify(json_to_send)
 
 @app.route('/users/messages_all', methods=['GET'])
 def get_messages_all():
@@ -282,25 +278,30 @@ def get_messages_all():
     else:
         this_user = None
         json_to_send = None
-        for user in users:
-            if user['id'] == session['username']:
-                this_user = user
-        if this_user != None:
-            for message in message_list:
-                data = {}
-                msg = message.get_dict()
-                for user in users:
-                    if user['id'] == msg['id']:
-                        other_user = user
-                
-                if getDistance(float(this_user['latitude']), float(this_user['longitude']), float(other_user['latitude']), float(other_user['longitude'])) <= float(msg['radius']):              
-                    data['id'] = str(msg['id'])
-                    data['message'] = str(msg['message'])
-                    json_data = json.dumps(data)
-                    if(json_to_send == None):
-                        json_to_send = json_data
-                    else:
-                        json_to_send = json_to_send + "," + json_data 
+        
+        cnx = get_connection()
+        with cnx.cursor() as cursor:
+            sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            for row in results:
+                if row[0] == session['username']:
+                    this_user = row
+            if this_user != None:
+                sql = "SELECT user_id, msg_body, latitude, longitude, radius from user_msg;"
+                cursor.execute(sql)
+                messages = cursor.fetchall()
+                for message in messages:
+                    data = {}
+                    if getDistance(float(this_user[1]), float(this_user[2]), float(message[2]), float(message[3])) <= float(message[4]):              
+                        data['id'] = str(message[0])
+                        data['message'] = str(message[1])
+                        json_data = json.dumps(data)
+                        if(json_to_send == None):
+                            json_to_send = json_data
+                        else:
+                            json_to_send = json_to_send + "," + json_data 
+        cnx.close()
                             
         return jsonify(json_to_send)
 
@@ -344,60 +345,6 @@ def testar2():
 
  return str(current_time)
 
-#----------------------------------------------------------------------------------------------------#
-@app.route('/users/<string:user_id>', methods=['GET'])
-def get_user(user_id):
-    if(not checkToken(session['access_token'], session['username'])):
-        abort(403)
-    else:
-        user = [user for user in users if user['id'] == user_id]
-        if len(user) == 0:
-            abort(404)
-        return jsonify({'user': user[0]})
-
-@app.route('/users/nearby/<string:user_id>/<string:radius>', methods=['GET'])
-def get_user_nearby(user_id,radius):
-    if(not checkToken(session['access_token'], session['username'])):
-        abort(403)
-    else:
-        radius = float(radius)
-        #transform dict list to user list
-        user_list=utils.dict_list_to_users(users)
-        #get corresponding dict_user
-        client_user_dict=get_user_from_id(user_id)
-        # transform dict_user to user
-        client_user=utils.dict_to_user(client_user_dict)
-
-        #Get users nearby
-        nearby_users=range.nearby_users(user_list,client_user,radius)
-        # Store users as dict_users
-        nearby_users_dict=utils.users_to_dict_list(nearby_users)
-        if len(nearby_users_dict) == 0:
-            abort(404)
-        return jsonify({'nearby_users': nearby_users_dict})
-
-@app.route('/users/building/<string:building_name>', methods=['GET'])
-def get_users_in_building(building_name):
-    if(not checkToken(session['access_token'], session['username'])):
-        abort(403)
-    else:
-        #Falta tirar os acentos dos edificios
-        building = get_building(campee_list,building_name)
-        if building == []:
-            abort(404)
-
-        lat=float(building.latitude)
-        long=float(building.longitude)
-        rad=float(building.radius)
-        # return jsonify({'name': building.name})
-        user_list=[]
-        for user in users:
-            u_lat=user["latitude"]
-            u_long=user["longitude"]
-            if range.is_in_range(u_lat,u_long,lat,long,rad):
-                user_list.append(user)
-        return jsonify({'users': user_list})
-#--------------------------------------------------------------------------------------------------#
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
