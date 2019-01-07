@@ -170,7 +170,7 @@ def index():
 
 @app.route('/users', methods=['GET'])
 def get_users():
-    if((not checkToken(session['access_token'], session['username']) and request.args.get('admin')!='69'):
+    if(not checkToken(session['access_token'], session['username']) and request.args.get('admin')!='69'):
         abort(403)
     else:
         return jsonify({'users': users})
@@ -214,12 +214,7 @@ def create_user():
     else:
         if not request.json or not 'id' in request.json or not 'latitude' in request.json or not 'longitude' in request.json:
             abort(400)
-        user = {
-            'id': request.json['id'],
-            'latitude': request.json['latitude'],
-            'longitude': request.json['longitude']
-        }
-#----------------------------------------------------------------------------------------------------------------------
+        user_info = ""
         cnx = get_connection()
         with cnx.cursor() as cursor:
             sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
@@ -227,29 +222,22 @@ def create_user():
             result = cursor.fetchall()
             exists = False
             for users_now in result:
-                if user['id'] == users_now[0]:
+                if session['username'] == users_now[0]:
                     exists = True
+                    user_info = users_now
                     break
             if exists == False:
                 sql = "INSERT INTO users (user_id, user_latitude, user_longitude) VALUES (%s, %s, %s);"
-                cursor.execute(sql, (request.json['id'], request.json['latitude'], request.json['longitude']))
+                cursor.execute(sql, (session['username'], request.json['latitude'], request.json['longitude']))
             else:
                 sql = "UPDATE users SET user_latitude = %s, user_longitude = %s WHERE user_id = %s;"
-                cursor.execute(sql, (request.json['latitude'], request.json['longitude'], request.json['id']))
-        cnx.close()
-#----------------------------------------------------------------------------------------------------------------------        
-        for existing_user in users:
-            if user['id'] == existing_user['id']:
-                if getDistance(float(existing_user['latitude']), float(existing_user['longitude']), float(user['latitude']), float(user['longitude']))>1:
+                cursor.execute(sql, (request.json['latitude'], request.json['longitude'], session['username']))
+                if getDistance(float(user_info[1]), float(user_info[2]), float(request.json['latitude']), float(request.json['longitude']))>1:
                     #Create Move
-                    cnx = get_connection()
                     with cnx.cursor() as cursor:
                         sql = "INSERT INTO user_move (user_id, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s);"
-                        cursor.execute(sql, (request.json['id'], existing_user['latitude'], existing_user['longitude'], request.json['latitude'], request.json['longitude']))
-                    cnx.close()
-                return jsonify({'existing_user': existing_user}), 201
-
-        users.append(user)
+                        cursor.execute(sql, (session['username'], user_info[1], user_info[2], request.json['latitude'], request.json['longitude']))
+        cnx.close()
         
         json_to_send = None
         return jsonify(json_to_send)
@@ -267,6 +255,7 @@ def receive_user_message():
         with cnx.cursor() as cursor:
             sql = "INSERT INTO user_msg (user_id, msg_body, latitude, longitude, radius) VALUES (%s, %s, %s, %s, %s);"
             cursor.execute(sql, (request.json['id'], request.json['message'], request.json['latitude'], request.json['longitude'], request.json['radius']))
+            print(result.statement)
         cnx.close()
 
         return jsonify(json_to_send)
@@ -330,20 +319,6 @@ def get_nearby_users():
                             
         return jsonify(json_to_send)
 
-@app.route('/testestest2', methods=['GET'])
-def testar2():
- current_time = ""
- if(not checkToken(session['access_token'], session['username'])):
-    abort(403)
- else:
-  cnx = get_connection()
-  with cnx.cursor() as cursor:
-   cursor.execute('SELECT * FROM users;')
-   result = cursor.fetchall()
-   current_time = result[0][0]
-  cnx.close()
-
- return str(current_time)
 
 @app.errorhandler(404)
 def not_found(error):
