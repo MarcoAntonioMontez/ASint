@@ -222,13 +222,18 @@ def receive_user_message():
 
 @app.route('/users/messages_all', methods=['GET'])
 def get_messages_all():
-    messages_dict=[]
+    json_to_send = None
     for message in message_list:
+        data = {}
         msg = message.get_dict()
-        basic_message = ''
-        basic_message = 'Sender ID:' + str(msg['id'])  + ' -> ' + str(msg['message'])
-        messages_dict.append(basic_message)
-    return jsonify(messages_dict)
+        data['id'] = str(msg['id'])
+        data['message'] = str(msg['message'])
+        json_data = json.dumps(data)
+        if(json_to_send == None):
+            json_to_send = json_data
+        else:
+            json_to_send = json_to_send + "," + json_data      
+    return jsonify(json_to_send)
 
 @app.route('/testestest2', methods=['GET'])
 def testar2():

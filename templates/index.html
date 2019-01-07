@@ -29,13 +29,22 @@
 </head>
 
 <body>
+
+
+<h1>Index</h1>
+
+<h2>Messages:</h2>
+    <textarea rows="5" cols="75" id="divDestiny"></textarea>
+
+<form action='sendMessage.html'>
+   Send a message <input type="submit" value="Go"  id="GoButtonClick"/><br>
+</form>
 <script>
-       //<![CDATA[
-       setInterval(ReadMessages, 3000);
+    ReadMessages();
+    setInterval(ReadMessages, 3000);
     function ReadMessages() {
         $( document ).ready(function() {            
             var desturl =  "https://asint-227116.appspot.com/users/messages_all";
-            console.log("click");
             $("#divDestiny").html("waiting");
             $.ajax({
                 type: "GET",
@@ -46,30 +55,21 @@
                 success: function (data) {
                     console.log(data);
                     
-                    if(data == null || data=="[]")
+                    if(data == null || data == "")
                         $("#divDestiny").html("No new messages");
                     else{
-                        var answer = JSON.parse(data);
+                        var answer = JSON.parse("["+data+"]");
                         var messages = "";
                         for (var i = 0; i < answer.length; i++) {
-                            messages += answer[i] + "\n";
+                            messages += "User " + answer[i].id + " said: " + answer[i].message + "\n";
                         }
-                        $("#divDestiny").html(messages);
+                        console.log(messages);
+                        document.getElementById('divDestiny').innerHTML = messages;
                     }
                 }
             });
         });
     }
 </script>
-
-<h1>Index</h1>
-
-<h2>Messages:</h2>
-    <textarea rows="5" cols="75" id="divDestiny"></textarea>
-
-<form action='sendMessage.html'>
-   Send a message <input type="submit" value="Go"  id="GoButtonClick"/><br>
-</form>
-
 </body>
 </html>
