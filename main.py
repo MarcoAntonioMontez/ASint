@@ -29,6 +29,8 @@ db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
 db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
 app = Flask(__name__)
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['REMEMBER_COOKIE_SECURE'] = True
 CORS(app)
 
 redis_client = bmemcached.Client('memcached-18466.c3.eu-west-1-1.ec2.cloud.redislabs.com:18466', 'mc-KBY4m', 'otaT9lPXY9e3ppBnemshXeyIIvhBlAGL')
@@ -103,8 +105,8 @@ def checkToken(token, username):
     else:
         return False
 
-def getDistance(lat1, lon1, lat2, lon2):
-    # approximate radius of earth in km
+def getDistance(lat1, lon1, lat2, lon2): 
+    # approximate radius of earth in meters
     R = 6373000.0
     lat1=radians(lat1)
     lon1=radians(lon1)
@@ -124,7 +126,7 @@ def getDistance(lat1, lon1, lat2, lon2):
 
 @app.route('/')
 def login():
-     return render_template('login.html')
+    return render_template('login.html')
 
 @app.route('/redirect', methods=["POST"])
 def my_redirect():
@@ -155,10 +157,10 @@ def callback():
 
     if(not checkToken(session['access_token'], session['username'])):
         authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
-        return redirect(authorization_url)    
+        return redirect(authorization_url)
 
     resp = make_response(redirect(url_for('index')))
-    resp.set_cookie('username', username)
+    resp.set_cookie('username', username, secure=True)  #accessible in javascript
     return resp 
 
 @app.route('/index', methods=["GET"])
@@ -193,10 +195,12 @@ def indexHTML():
 
 @app.route('/logout')
 def logout():
+    resp = make_response(redirect(url_for('login')))
     if(checkToken(session['access_token'], session['username'])):
+        resp.set_cookie('username', expires=0) 
         redis_client.delete(session['username'])
         session.pop('username')
-    return redirect(url_for('login'))
+    return resp
 
 
 @app.route('/users', methods=['POST'])
@@ -229,6 +233,23 @@ def create_user():
                 sql = "UPDATE users SET user_latitude = %s, user_longitude = %s WHERE user_id = %s;"
                 cursor.execute(sql, (request.json['latitude'], request.json['longitude'], request.json['id']))
         cnx.close()
+        for existing_user in users:
+
+            if user['id'] == existing_user['id']:
+                if getDistance(float(existing_user['latitude']), float(existing_user['longitude']), float(user['latitude']), float(user['longitude']))>1:
+                    #Create Move
+                    move = {
+                        'id': user["id"],
+                        'old_latitude': existing_user['latitude'],
+                        'old_longitude': existing_user['longitude'],
+                        'new_latitude': user["latitude"],
+                        'new_longitude': user['longitude'],
+                    }
+                    move_list.append(move)
+                    existing_user['latitude'] = user['latitude']
+                    existing_user['longitude'] = user['longitude']
+                return jsonify({'existing_user': existing_user}), 201
+
         users.append(user)
         
         json_to_send = None
@@ -260,11 +281,12 @@ def get_messages_all():
         abort(403)
     else:
         json_to_send = None
-        this_user = [user for user in users if user['id'] == session['username']]
+        #this_user = [user for user in users if user['id'] == session['username']]
         print(this_user)
         for message in message_list:
             data = {}
             msg = message.get_dict()
+
             other_user = [user for user in users if user['id'] == msg['id']]
             #print(other_user)
             #print(float(this_user['latitude']))
