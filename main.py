@@ -200,6 +200,22 @@ def indexHTML():
     else:
         return render_template('index.html')
 
+#@app.route('/createBuilding', methods=['POST'])
+#def createBuilding():
+#    newname = request.json['newname']
+#    newlatitude = request.json['newlatitude']
+#    newlongitude = request.json['newlongitude']
+#    newradius = request.json['newradius']
+#    cnx = get_connection()
+#    result = ""
+#    with cnx.cursor() as cursor:
+#        sql = "INSERT INTO buildings (building_name, latitude, longitude, radius) VALUES (%s, %s, %s, %s);"
+#        cursor.execute(sql, (newname, newlatitude, newlongitude, newradius))
+#        result = cursor.fetchall()
+#    cnx.close()
+#    return result
+
+
 @app.route('/logout')
 def logout():
     resp = make_response(redirect(url_for('login')))
