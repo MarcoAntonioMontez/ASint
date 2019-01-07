@@ -29,6 +29,8 @@ db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
 db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
 app = Flask(__name__)
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['REMEMBER_COOKIE_SECURE'] = True
 CORS(app)
 
 redis_client = bmemcached.Client('memcached-18466.c3.eu-west-1-1.ec2.cloud.redislabs.com:18466', 'mc-KBY4m', 'otaT9lPXY9e3ppBnemshXeyIIvhBlAGL')
@@ -120,7 +122,7 @@ def getDistance(lat1, lon1, lat2, lon2):
 
 @app.route('/')
 def login():
-     return render_template('login.html')
+    return render_template('login.html')
 
 @app.route('/redirect', methods=["POST"])
 def my_redirect():
@@ -155,7 +157,7 @@ def callback():
 
 
     resp = make_response(redirect(url_for('index')))
-    resp.set_cookie('username', username)
+    resp.set_cookie('username', username, secure=True)
     return resp 
 
 @app.route('/index', methods=["GET"])
@@ -254,21 +256,21 @@ def get_messages_all():
         abort(403)
     else:
         json_to_send = None
-        this_user = [user for user in users if user['id'] == session['username']]
+        
         print(this_user)
         for message in message_list:
             data = {}
             msg = message.get_dict()
             
-            if getDistance(this_user['latitude'], this_user['longitude'], msg['latitude'], msg['longitude']) <= msg['radius']:                
-                data['id'] = str(msg['id'])
-                data['message'] = str(msg['message'])
-                json_data = json.dumps(data)
-                if(json_to_send == None):
-                    json_to_send = json_data
-                else:
-                    json_to_send = json_to_send + "," + json_data 
-                         
+            
+        data['id'] = str(msg['id'])
+        data['message'] = str(msg['message'])
+        json_data = json.dumps(data)
+        if(json_to_send == None):
+            json_to_send = json_data
+        else:
+            json_to_send = json_to_send + "," + json_data 
+                        
         return jsonify(json_to_send)
 
 @app.route('/testestest2', methods=['GET'])
