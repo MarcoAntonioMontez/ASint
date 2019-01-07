@@ -101,7 +101,7 @@ def checkToken(token, username):
 
 
 @app.route('/')
-def home():
+def login():
      return render_template('login.html')
 
 @app.route('/redirect', methods=["POST"])
@@ -180,6 +180,13 @@ def indexHTML():
         return redirect(authorization_url)
     else:
         return render_template('index.html')
+
+@app.route('/logout')
+def logout():
+    if(checkToken(session['access_token'], session['username'])):
+        redis_client.delete(session['username'])
+        session.pop('username')
+    return redirect(url_for('login'))
 
 
 @app.route('/users/<string:user_id>', methods=['GET'])
