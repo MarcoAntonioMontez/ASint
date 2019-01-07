@@ -1,5 +1,6 @@
 import getpass
 import requests
+import urllib
 
 
 print('Please Login \n')
@@ -19,7 +20,7 @@ while(1):
     #elif (command=='add_building'):
         
     elif (command=='list_all_users'):
-        url = new URL("https://asint-227116.appspot.com/users?admin=69);
+        url = "https://asint-227116.appspot.com/users"
         r = requests.get(url)
         print(r.content)
     #elif (command=='list_users_building'):
