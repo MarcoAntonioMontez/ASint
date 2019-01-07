@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify,abort,make_response, redirect, session, url_for
+from math import sin, cos, sqrt, atan2, radians
 from requests_oauthlib import OAuth2Session
 import requests
 import urllib3
@@ -98,11 +99,29 @@ def checkToken(token, username):
         return True
     else:
         return False
-        
+
+def getDistance(lat1, lon1, lat2, lon2):
+    # approximate radius of earth in km
+    R = 6373000.0
+    lat1=radians(lat1)
+    lon1=radians(lon1)
+    lat2=radians(lat2)
+    lon2=radians(lon2)  
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1  
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+    
+    #distance between 1 and 2 in meters
+    return distance
 
 
 @app.route('/')
-def home():
+def login():
      return render_template('login.html')
 
 @app.route('/redirect', methods=["POST"])
@@ -181,6 +200,13 @@ def indexHTML():
         return redirect(authorization_url)
     else:
         return render_template('index.html')
+
+@app.route('/logout')
+def logout():
+    if(checkToken(session['access_token'], session['username'])):
+        redis_client.delete(session['username'])
+        session.pop('username')
+    return redirect(url_for('login'))
 
 
 @app.route('/users/<string:user_id>', methods=['GET'])
