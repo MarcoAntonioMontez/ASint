@@ -179,6 +179,13 @@ def sendMessage():
     else:
         return render_template('sendMessage.html')
 
+@app.route('/nearbyUsers.html')
+def check_nearby_users():
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        return render_template('nearbyUsers.html')
+
 @app.route('/index.html')
 def indexHTML():
     if(not checkToken(session['access_token'], session['username'])):
@@ -252,27 +259,52 @@ def get_messages_all():
     if(not checkToken(session['access_token'], session['username'])):
         abort(403)
     else:
+        this_user = None
         json_to_send = None
-        this_user = [user for user in users if user['id'] == session['username']]
-        print(this_user)
-        for message in message_list:
-            data = {}
-            msg = message.get_dict()
-            other_user = [user for user in users if user['id'] == msg['id']]
-            #print(other_user)
-            #print(float(this_user['latitude']))
-            #print(float(this_user['longitude']))
-            #print(float(other_user['latitude']))
-            #print(float(other_user['longitude']))
-            #if getDistance(float(this_user['latitude']), float(this_user['longitude']), float(other_user['latitude']), float(other_user['longitude'])) <= float(msg['radius']):              
-            data['id'] = str(msg['id'])
-            data['message'] = str(msg['message'])
-            json_data = json.dumps(data)
-            if(json_to_send == None):
-                json_to_send = json_data
-            else:
-                json_to_send = json_to_send + "," + json_data 
-                         
+        for user in users:
+            if user['id'] == session['username']:
+                this_user = user
+        if this_user != None:
+            for message in message_list:
+                data = {}
+                msg = message.get_dict()
+                for user in users:
+                    if user['id'] == msg['id']:
+                        other_user = user
+                
+                if getDistance(float(this_user['latitude']), float(this_user['longitude']), float(other_user['latitude']), float(other_user['longitude'])) <= float(msg['radius']):              
+                    data['id'] = str(msg['id'])
+                    data['message'] = str(msg['message'])
+                    json_data = json.dumps(data)
+                    if(json_to_send == None):
+                        json_to_send = json_data
+                    else:
+                        json_to_send = json_to_send + "," + json_data 
+                            
+        return jsonify(json_to_send)
+
+@app.route('/nearbyUsers', methods=['GET'])
+def get_nearby_users():
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        this_user = None
+        json_to_send = None
+        for user in users:
+            if user['id'] == session['username']:
+                this_user = user
+        if this_user != None:       
+            data = {}     
+            for other_user in users:
+            
+                if getDistance(float(this_user['latitude']), float(this_user['longitude']), float(other_user['latitude']), float(other_user['longitude'])) <= 10:              
+                    data['id'] = other_user['id']
+                    json_data = json.dumps(data)
+                    if(json_to_send == None):
+                        json_to_send = json_data
+                    else:
+                        json_to_send = json_to_send + "," + json_data 
+                            
         return jsonify(json_to_send)
 
 @app.route('/testestest2', methods=['GET'])
