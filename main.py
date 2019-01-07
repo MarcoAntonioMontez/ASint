@@ -93,6 +93,10 @@ def get_user_from_id(user_id):
     user = [user for user in users if user['id'] == user_id]
     return user[0]
 
+def get_connection():
+    return pymysql.connect(user=db_user, password=db_password,
+                              unix_socket=unix_socket, db=db_name, autocommit=True)
+
 def checkToken(token, username):
     if redis_client.get(username)==token:
         return True
@@ -208,24 +212,27 @@ def create_user():
             'longitude': request.json['longitude']
         }
 
-        for existing_user in users:
-            if user['id'] == existing_user['id']:
-                if getDistance(float(existing_user['latitude']), float(existing_user['longitude']), float(user['latitude']), float(user['longitude']))>1:
-                    #Create Move
-                    move = {
-                        'id': user["id"],
-                        'old_latitude': existing_user['latitude'],
-                        'old_longitude': existing_user['longitude'],
-                        'new_latitude': user["latitude"],
-                        'new_longitude': user['longitude'],
-                    }
-                    move_list.append(move)
-                    existing_user['latitude'] = user['latitude']
-                    existing_user['longitude'] = user['longitude']
-                return jsonify({'existing_user': existing_user}), 201
-
+        cnx = get_connection()
+        with cnx.cursor() as cursor:
+            sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            exists = False
+            for users_now in result:
+                if user['id'] == users_now[0]:
+                    exists = True
+                    break
+            if exists == False:
+                sql = "INSERT INTO users (user_id, user_latitude, user_longitude) VALUES (%s, %s, %s);"
+                cursor.execute(sql, (request.json['id'], request.json['latitude'], request.json['longitude']))
+            else:
+                sql = "UPDATE users SET user_latitude = %s, user_longitude = %s WHERE user_id = %s;"
+                cursor.execute(sql, (request.json['latitude'], request.json['longitude'], request.json['id']))
+        cnx.close()
         users.append(user)
-        return jsonify({'user': user}), 201
+        
+        json_to_send = None
+        return jsonify(json_to_send)
 
 @app.route('/users/message', methods=['POST'])
 def receive_user_message():
@@ -281,8 +288,7 @@ def testar2():
  if(not checkToken(session['access_token'], session['username'])):
     abort(403)
  else:
-  cnx = pymysql.connect(user=db_user, password=db_password,
-                              unix_socket=unix_socket, db=db_name)
+  cnx = get_connection()
   with cnx.cursor() as cursor:
    cursor.execute('SELECT * FROM users;')
    result = cursor.fetchall()
