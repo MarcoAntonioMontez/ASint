@@ -15,11 +15,18 @@ from flask_cors import CORS
 import fenixedu
 import bmemcached
 import os
+import pymysql
 
 config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
 client = fenixedu.FenixEduClient(config)
 
 base_url = 'https://fenix.tecnico.ulisboa.pt/'
+
+
+db_user = os.environ.get('CLOUD_SQL_USERNAME')
+db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
+db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
 app = Flask(__name__)
 CORS(app)
@@ -39,18 +46,12 @@ buildingUrls.append(ur1)
 buildingUrls.append(ur2)
 buildingUrls.append(ur3)
 
-import pymysql
-
-db_user = os.environ.get('CLOUD_SQL_USERNAME')
-db_password = os.environ.get('CLOUD_SQL_PASSWORD')
-db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
-db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
-
-
 ##Init de users para debug
 users = []
 campeeList = []
 message_list = []
+
+unix_socket = '/cloudsql/{}'.format(db_connection_name)
 
 with open('ISTCampee_formated.data', 'rb') as filehandle:
     # read the data as binary data stream
@@ -304,22 +305,19 @@ def get_messages_all():
 
 @app.route('/testestest2', methods=['GET'])
 def testar2():
-    if(not checkToken(session['access_token'], session['username'])):
-        abort(403)
-    else:
-        cnx = mysql.connector.connect(user='root',
-                                passwd='123qweASD',
-                                host='35.242.185.194',
-                                database='asintdb'
-        )
-        cursor = cnx.cursor()
+ current_time = ""
+ if(not checkToken(session['access_token'], session['username'])):
+    abort(403)
+ else:
+  cnx = pymysql.connect(user=db_user, password=db_password,
+                              unix_socket=unix_socket, db=db_name)
+  with cnx.cursor() as cursor:
+   cursor.execute('SELECT * FROM users;')
+   result = cursor.fetchall()
+   current_time = result[0][0]
+  cnx.close()
 
-        cursor.execute("SELECT * FROM users")
-        batata = cursor
-
-        cursor.close()
-        cnx.close()
-    return jsonify("hello")
+ return str(current_time)
 
 @app.errorhandler(404)
 def not_found(error):
