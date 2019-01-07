@@ -53,15 +53,13 @@
                 contentType: "text/plain",
                 data: '',
                 success: function (data) {
-                    console.log(data);
-                    
                     if(data == null || data == "")
                         $("#divDestiny").html("No new messages");
                     else{
                         var answer = JSON.parse("["+data+"]");
                         var messages = "";
                         for (var i = 0; i < answer.length; i++) {
-                            messages += "User " + answer[i].id + " said: " + answer[i].message + "\n";
+                            messages += "User " + answer[i].id + " said: " + "\"" + answer[i].message + "\"\n";
                         }
                         console.log(messages);
                         document.getElementById('divDestiny').innerHTML = messages;
