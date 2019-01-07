@@ -92,6 +92,7 @@ def checkToken(token, username):
         return False
         
 
+
 @app.route('/')
 def home():
      return render_template('login.html')
@@ -134,138 +135,177 @@ def callback():
         authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
         return redirect(authorization_url)
     
-    return redirect(url_for('index'))
+
+    resp = make_response(redirect(url_for('index')))
+    resp.set_cookie('username', username)
+    return resp 
+    
 
 
         
 
 @app.route('/index', methods=["GET"])
 def index():
-    return render_template('index.html')
+    if(not checkToken(session['access_token'], session['username'])):
+        authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
+        return redirect(authorization_url)
+    else:
+        return render_template('index.html')
 
 @app.route('/users', methods=['GET'])
 def get_users():
-    return jsonify({'users': users})
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        return jsonify({'users': users})
 
 @app.route('/sendMessage.html')
 def sendMessage():
-    return render_template('sendMessage.html')
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        return render_template('sendMessage.html')
 
 @app.route('/index.html')
 def indexHTML():
-    return render_template('index.html')
+    if(not checkToken(session['access_token'], session['username'])):
+        authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
+        return redirect(authorization_url)
+    else:
+        return render_template('index.html')
 
 
 @app.route('/users/<string:user_id>', methods=['GET'])
 def get_user(user_id):
-    user = [user for user in users if user['id'] == user_id]
-    if len(user) == 0:
-        abort(404)
-    return jsonify({'user': user[0]})
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        user = [user for user in users if user['id'] == user_id]
+        if len(user) == 0:
+            abort(404)
+        return jsonify({'user': user[0]})
 
 @app.route('/users/nearby/<string:user_id>/<string:radius>', methods=['GET'])
 def get_user_nearby(user_id,radius):
-    radius = float(radius)
-    #transform dict list to user list
-    user_list=utils.dict_list_to_users(users)
-    #get corresponding dict_user
-    client_user_dict=get_user_from_id(user_id)
-    # transform dict_user to user
-    client_user=utils.dict_to_user(client_user_dict)
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        radius = float(radius)
+        #transform dict list to user list
+        user_list=utils.dict_list_to_users(users)
+        #get corresponding dict_user
+        client_user_dict=get_user_from_id(user_id)
+        # transform dict_user to user
+        client_user=utils.dict_to_user(client_user_dict)
 
-    #Get users nearby
-    nearby_users=range.nearby_users(user_list,client_user,radius)
-    # Store users as dict_users
-    nearby_users_dict=utils.users_to_dict_list(nearby_users)
-    if len(nearby_users_dict) == 0:
-        abort(404)
-    return jsonify({'nearby_users': nearby_users_dict})
+        #Get users nearby
+        nearby_users=range.nearby_users(user_list,client_user,radius)
+        # Store users as dict_users
+        nearby_users_dict=utils.users_to_dict_list(nearby_users)
+        if len(nearby_users_dict) == 0:
+            abort(404)
+        return jsonify({'nearby_users': nearby_users_dict})
 
 @app.route('/users/building/<string:building_name>', methods=['GET'])
 def get_users_in_building(building_name):
-    #Falta tirar os acentos dos edificios
-    building = get_building(campee_list,building_name)
-    if building == []:
-        abort(404)
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        #Falta tirar os acentos dos edificios
+        building = get_building(campee_list,building_name)
+        if building == []:
+            abort(404)
 
-    lat=float(building.latitude)
-    long=float(building.longitude)
-    rad=float(building.radius)
-    # return jsonify({'name': building.name})
-    user_list=[]
-    for user in users:
-        u_lat=user["latitude"]
-        u_long=user["longitude"]
-        if range.is_in_range(u_lat,u_long,lat,long,rad):
-            user_list.append(user)
-    return jsonify({'users': user_list})
+        lat=float(building.latitude)
+        long=float(building.longitude)
+        rad=float(building.radius)
+        # return jsonify({'name': building.name})
+        user_list=[]
+        for user in users:
+            u_lat=user["latitude"]
+            u_long=user["longitude"]
+            if range.is_in_range(u_lat,u_long,lat,long,rad):
+                user_list.append(user)
+        return jsonify({'users': user_list})
 
 @app.route('/users', methods=['POST'])
 def create_user():
-    if not request.json or not 'id' in request.json or not 'latitude' in request.json or not 'longitude' in request.json:
-        abort(400)
-    user = {
-        'id': request.json['id'],
-        'latitude': request.json['latitude'],
-        'longitude': request.json['longitude']
-    }
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        if not request.json or not 'id' in request.json or not 'latitude' in request.json or not 'longitude' in request.json:
+            abort(400)
+        user = {
+            'id': request.json['id'],
+            'latitude': request.json['latitude'],
+            'longitude': request.json['longitude']
+        }
 
-    for existing_user in users:
-        if user["id"] == existing_user["id"]:
-            existing_user["latitude"] = user["latitude"]
-            existing_user["longitude"] = user["longitude"]
-            return jsonify({'existing_user': existing_user}), 201
+        for existing_user in users:
+            if user["id"] == existing_user["id"]:
+                existing_user["latitude"] = user["latitude"]
+                existing_user["longitude"] = user["longitude"]
+                return jsonify({'existing_user': existing_user}), 201
 
-    users.append(user)
-    return jsonify({'user': user}), 201
+        users.append(user)
+        return jsonify({'user': user}), 201
 
 @app.route('/users/message', methods=['POST'])
 def receive_user_message():
-    if not request.json or not 'id' in request.json or not 'message' in request.json or not 'radius' in request.json:
-        abort(400)
-    message_dict = {
-        'id': request.json['id'],
-        'message': request.json['message'],
-        'radius': request.json['radius'],
-        'latitude': request.json['latitude'],
-        'longitude': request.json['longitude']
-    }
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        if not request.json or not 'id' in request.json or not 'message' in request.json or not 'radius' in request.json:
+            abort(400)
+        message_dict = {
+            'id': request.json['id'],
+            'message': request.json['message'],
+            'radius': request.json['radius'],
+            'latitude': request.json['latitude'],
+            'longitude': request.json['longitude']
+        }
 
-    message = Message(message_dict)
-    message_list.append(message)
+        message = Message(message_dict)
+        message_list.append(message)
 
-    return jsonify({'message': message_dict}), 201
+        return jsonify({'message': message_dict}), 201
 
 @app.route('/users/messages_all', methods=['GET'])
 def get_messages_all():
-    json_to_send = None
-    for message in message_list:
-        data = {}
-        msg = message.get_dict()
-        data['id'] = str(msg['id'])
-        data['message'] = str(msg['message'])
-        json_data = json.dumps(data)
-        if(json_to_send == None):
-            json_to_send = json_data
-        else:
-            json_to_send = json_to_send + "," + json_data      
-    return jsonify(json_to_send)
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        json_to_send = None
+        for message in message_list:
+            data = {}
+            msg = message.get_dict()
+            data['id'] = str(msg['id'])
+            data['message'] = str(msg['message'])
+            json_data = json.dumps(data)
+            if(json_to_send == None):
+                json_to_send = json_data
+            else:
+                json_to_send = json_to_send + "," + json_data      
+        return jsonify(json_to_send)
 
 @app.route('/testestest2', methods=['GET'])
 def testar2():
- cnx = mysql.connector.connect(user='root',
+    if(not checkToken(session['access_token'], session['username'])):
+        abort(403)
+    else:
+        cnx = mysql.connector.connect(user='root',
                                 passwd='123qweASD',
                                 host='35.242.185.194',
                                 database='asintdb'
- )
- cursor = cnx.cursor()
+        )
+        cursor = cnx.cursor()
 
- cursor.execute("SELECT * FROM users")
- batata = cursor
+        cursor.execute("SELECT * FROM users")
+        batata = cursor
 
- cursor.close()
- cnx.close()
- return jsonify("hello")
+        cursor.close()
+        cnx.close()
+    return jsonify("hello")
 
 @app.errorhandler(404)
 def not_found(error):
@@ -274,6 +314,10 @@ def not_found(error):
 @app.errorhandler(400)
 def not_found(error):
     return make_response(jsonify({'error': 'Bad request'}), 400)
+
+@app.errorhandler(403)
+def forbidden(error):
+    return make_response(jsonify({'error': 'Forbidden'}), 403)
 
 
 
