@@ -29,6 +29,8 @@ db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
 db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
 app = Flask(__name__)
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['REMEMBER_COOKIE_SECURE'] = True
 CORS(app)
 
 redis_client = bmemcached.Client('memcached-18466.c3.eu-west-1-1.ec2.cloud.redislabs.com:18466', 'mc-KBY4m', 'otaT9lPXY9e3ppBnemshXeyIIvhBlAGL')
@@ -93,14 +95,18 @@ def get_user_from_id(user_id):
     user = [user for user in users if user['id'] == user_id]
     return user[0]
 
+def get_connection():
+    return pymysql.connect(user=db_user, password=db_password,
+                              unix_socket=unix_socket, db=db_name, autocommit=True)
+
 def checkToken(token, username):
     if redis_client.get(username)==token:
         return True
     else:
         return False
 
-def getDistance(lat1, lon1, lat2, lon2):
-    # approximate radius of earth in km
+def getDistance(lat1, lon1, lat2, lon2): 
+    # approximate radius of earth in meters
     R = 6373000.0
     lat1=radians(lat1)
     lon1=radians(lon1)
@@ -120,7 +126,7 @@ def getDistance(lat1, lon1, lat2, lon2):
 
 @app.route('/')
 def login():
-     return render_template('login.html')
+    return render_template('login.html')
 
 @app.route('/redirect', methods=["POST"])
 def my_redirect():
@@ -151,10 +157,10 @@ def callback():
 
     if(not checkToken(session['access_token'], session['username'])):
         authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
-        return redirect(authorization_url)    
+        return redirect(authorization_url)
 
     resp = make_response(redirect(url_for('index')))
-    resp.set_cookie('username', username)
+    resp.set_cookie('username', username, secure=True)  #accessible in javascript
     return resp 
 
 @app.route('/index', methods=["GET"])
@@ -196,10 +202,12 @@ def indexHTML():
 
 @app.route('/logout')
 def logout():
+    resp = make_response(redirect(url_for('login')))
     if(checkToken(session['access_token'], session['username'])):
+        resp.set_cookie('username', expires=0) 
         redis_client.delete(session['username'])
         session.pop('username')
-    return redirect(url_for('login'))
+    return resp
 
 
 @app.route('/users', methods=['POST'])
@@ -215,7 +223,25 @@ def create_user():
             'longitude': request.json['longitude']
         }
 
+        cnx = get_connection()
+        with cnx.cursor() as cursor:
+            sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            exists = False
+            for users_now in result:
+                if user['id'] == users_now[0]:
+                    exists = True
+                    break
+            if exists == False:
+                sql = "INSERT INTO users (user_id, user_latitude, user_longitude) VALUES (%s, %s, %s);"
+                cursor.execute(sql, (request.json['id'], request.json['latitude'], request.json['longitude']))
+            else:
+                sql = "UPDATE users SET user_latitude = %s, user_longitude = %s WHERE user_id = %s;"
+                cursor.execute(sql, (request.json['latitude'], request.json['longitude'], request.json['id']))
+        cnx.close()
         for existing_user in users:
+
             if user['id'] == existing_user['id']:
                 if getDistance(float(existing_user['latitude']), float(existing_user['longitude']), float(user['latitude']), float(user['longitude']))>1:
                     #Create Move
@@ -232,7 +258,9 @@ def create_user():
                 return jsonify({'existing_user': existing_user}), 201
 
         users.append(user)
-        return jsonify({'user': user}), 201
+        
+        json_to_send = None
+        return jsonify(json_to_send)
 
 @app.route('/users/message', methods=['POST'])
 def receive_user_message():
@@ -290,6 +318,7 @@ def get_nearby_users():
     else:
         this_user = None
         json_to_send = None
+<<<<<<< HEAD
         for user in users:
             if user['id'] == session['username']:
                 this_user = user
@@ -313,8 +342,7 @@ def testar2():
  if(not checkToken(session['access_token'], session['username'])):
     abort(403)
  else:
-  cnx = pymysql.connect(user=db_user, password=db_password,
-                              unix_socket=unix_socket, db=db_name)
+  cnx = get_connection()
   with cnx.cursor() as cursor:
    cursor.execute('SELECT * FROM users;')
    result = cursor.fetchall()
