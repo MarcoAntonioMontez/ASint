@@ -14,6 +14,7 @@ from message import Message
 from flask_cors import CORS
 import fenixedu
 import bmemcached
+import os
 
 config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
 client = fenixedu.FenixEduClient(config)
@@ -38,6 +39,12 @@ buildingUrls.append(ur1)
 buildingUrls.append(ur2)
 buildingUrls.append(ur3)
 
+import pymysql
+
+db_user = os.environ.get('CLOUD_SQL_USERNAME')
+db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
+db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
 
 ##Init de users para debug
