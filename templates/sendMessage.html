@@ -76,20 +76,32 @@
 
 <h1>Message Page</h1>
 
-<h2>Create or Update User</h2>
-
-
-    Message:         <input type="text" required='required' size="100" id="msg_body"/><br>
-    Radius:          <input type="number" step="1" required='required' id="msg_radius" required/><br>
-
-    <input type="submit" value="Send"  id="sendMsgButtonClick"/><br>
+<h2>Send a new message to the people around you</h2>
 
 <form action='index.html'>
-
-
-   Go to message page <input type="submit" value="Go"  id="GoButtonClick"/><br>
-
+  <input type="submit" value="&#8592;"  id="GoButtonClick"/> <span>&nbsp;Go to message page<span> 
+    <br>
 </form>
+<br>
+<form>
+    <table>
+        <tr>
+            <th style="padding: 5px; text-align: left;">Message:</th>
+            <th style="padding: 5px; text-align: left;">
+                <input type="text" required='required' size="100" id="msg_body" style="position: absolute; left:100px;"/><br>
+            </th>
+        <tr>
+            <th style="padding: 5px; text-align: left;">Radius:</th>
+            <th style="padding: 5px; text-align: left;">
+                <input type="number" step="1" required='required' id="msg_radius" style="position: absolute; left:100px;"/><br>
+            </th>
+        </tr>
+    </table>
+    <br>
+    <input type="submit" value="Send new message"  id="sendMsgButtonClick"style="position: absolute; left:100px;"/><br>
+</form>
+<br>
+<br>
 
 </body>
 </html>
