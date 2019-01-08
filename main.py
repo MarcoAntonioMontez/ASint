@@ -240,6 +240,11 @@ def create_user():
                     with cnx.cursor() as cursor:
                         sql = "INSERT INTO user_move (user_id, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s);"
                         cursor.execute(sql, (session['username'], user_info[1], user_info[2], request.json['latitude'], request.json['longitude']))
+                        sql = "SELECT ID FROM user_move ORDER BY ID DESC LIMIT 1;"
+                        cursor.execute(sql)
+                        result = cursor.fetchall()
+                        sql = "INSERT INTO logs (content_id, user_id, entry_type) VALUES (%s, %s, 'Move');"
+                        cursor.execute(sql, (result[0][0], session['username']))
         cnx.close()
         
         json_to_send = None
@@ -257,8 +262,12 @@ def receive_user_message():
         cnx = get_connection()
         with cnx.cursor() as cursor:
             sql = "INSERT INTO user_msg (user_id, msg_body, latitude, longitude, radius) VALUES (%s, %s, %s, %s, %s);"
-            cursor.execute(sql, (request.json['id'], request.json['message'], request.json['latitude'], request.json['longitude'], request.json['radius']))
-            print(result.statement)
+            cursor.execute(sql, (session['username'], request.json['message'], request.json['latitude'], request.json['longitude'], request.json['radius']))
+            sql = "SELECT ID FROM user_msg ORDER BY ID DESC LIMIT 1;"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            sql = "INSERT INTO logs (content_id, user_id, entry_type) VALUES (%s, %s, 'Msg');"
+            cursor.execute(sql, (result[0][0], session['username']))
         cnx.close()
 
         return jsonify(json_to_send)
