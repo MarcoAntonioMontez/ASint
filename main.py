@@ -200,6 +200,22 @@ def indexHTML():
     else:
         return render_template('index.html')
 
+#@app.route('/createBuilding', methods=['POST'])
+#def createBuilding():
+#    newname = request.json['newname']
+#    newlatitude = request.json['newlatitude']
+#    newlongitude = request.json['newlongitude']
+#    newradius = request.json['newradius']
+#    cnx = get_connection()
+#    result = ""
+#    with cnx.cursor() as cursor:
+#        sql = "INSERT INTO buildings (building_name, latitude, longitude, radius) VALUES (%s, %s, %s, %s);"
+#        cursor.execute(sql, (newname, newlatitude, newlongitude, newradius))
+#        result = cursor.fetchall()
+#    cnx.close()
+#    return result
+
+
 @app.route('/logout')
 def logout():
     resp = make_response(redirect(url_for('login')))
@@ -306,31 +322,33 @@ def get_messages_all():
                             
         return jsonify(json_to_send)
 
-@app.route('/nearbyUsers', methods=['GET'])
+@app.route('/nearbyUsers', methods=['POST'])
 def get_nearby_users():
     if(not checkToken(session['access_token'], session['username'])):
         abort(403)
     else:
-        this_user = None
-        json_to_send = None
-        
-        for user in users:
-            if user['id'] == session['username']:
-                this_user = user
-        if this_user != None:       
-            data = {}     
-            for other_user in users:
-            
-                if getDistance(float(this_user['latitude']), float(this_user['longitude']), float(other_user['latitude']), float(other_user['longitude'])) <= 10:              
-                    data['id'] = other_user['id']
-                    json_data = json.dumps(data)
-                    if(json_to_send == None):
-                        json_to_send = json_data
-                    else:
-                        json_to_send = json_to_send + "," + json_data 
+        radius = request.json['radius']
+        cnx = get_connection()
+        with cnx.cursor() as cursor:
+            sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            for row in results:
+                if row[0] == session['username']:
+                    this_user = row
+            if this_user != None:      
+                data = {}     
+                for other_user in results:
+                
+                    if getDistance(float(this_user[1]), float(this_user[2]), float(other_user[1]), float(other_user[2])) <= radius:              
+                        data['id'] = other_user[0]
+                        json_data = json.dumps(data)
+                        if(json_to_send == None):
+                            json_to_send = json_data
+                        else:
+                            json_to_send = json_to_send + "," + json_data 
                             
         return jsonify(json_to_send)
-
 
 @app.errorhandler(404)
 def not_found(error):
