@@ -327,7 +327,7 @@ def get_nearby_users():
     if(not checkToken(session['access_token'], session['username'])):
         abort(403)
     else:
-        radius = request.json['radius']
+        radius = 10
         cnx = get_connection()
         with cnx.cursor() as cursor:
             sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
