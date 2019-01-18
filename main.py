@@ -285,21 +285,14 @@ def receive_user_message():
         json_to_send = None
         cnx = get_connection()
         with cnx.cursor() as cursor:
-<<<<<<< HEAD
             now = datetime.now()
             str_now = now.strftime('%Y-%m-%d %H:%M:%S')
             sql = "INSERT INTO user_msg (user_id, msg_time, msg_body, latitude, longitude, radius) VALUES (%s, %s, %s, %s, %s, %s);"
             cursor.execute(sql, (request.json['id'], str_now, request.json['message'], request.json['latitude'], request.json['longitude'], request.json['radius']))
             print(result.statement)
-=======
-            sql = "INSERT INTO user_msg (user_id, msg_body, latitude, longitude, radius) VALUES (%s, %s, %s, %s, %s);"
-            cursor.execute(sql, (session['username'], request.json['message'], request.json['latitude'], request.json['longitude'], request.json['radius']))
-            sql = "SELECT ID FROM user_msg ORDER BY ID DESC LIMIT 1;"
-            cursor.execute(sql)
             result = cursor.fetchall()
             sql = "INSERT INTO logs (content_id, user_id, entry_type) VALUES (%s, %s, 'Msg');"
             cursor.execute(sql, (result[0][0], session['username']))
->>>>>>> 15b9e22929e5d579e424a87ed1a6ecce3a9d7563
         cnx.close()
 
         return jsonify(json_to_send)
@@ -343,11 +336,8 @@ def get_nearby_users():
     if(not checkToken(session['access_token'], session['username'])):
         abort(403)
     else:
-<<<<<<< HEAD
+
         radius = request.form['radius']
-=======
-        radius = 10
->>>>>>> 15b9e22929e5d579e424a87ed1a6ecce3a9d7563
         cnx = get_connection()
         with cnx.cursor() as cursor:
             sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
