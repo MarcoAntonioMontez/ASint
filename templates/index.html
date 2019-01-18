@@ -53,24 +53,14 @@
     <div class = "container">
         <center>
         <h3>Check nearby users:</h3>
-        <form action='https://asint-227116.appspot.com/nearbyUsers' method='POST' onsubmit="return checkform()">
-            Radius <input type="number" name="radius"  id="test">(meters)<br> 
+        <form action='https://asint-227116.appspot.com/nearbyUsers' method='POST'>
+            Radius <input type="number" name="radius" id="test" required='required' min="0" oninput="validity.valid||(value='');">(meters)<br> 
             <button type="submit" value="Submit" id=btnSubmit>Go</button>
         </form>
         </center>
     </div>
     
 <script>
-    function checkform(){
-        var fieldvalue = $.trim($('#test').val());
-        if(!fieldvalue || fieldvalue==""){
-            alert('No input radius');
-            return false;
-        }else{
-            return true;
-        }
-    }
-    
     function getCookieValue(a) {
         var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
         return b ? b.pop() : '';

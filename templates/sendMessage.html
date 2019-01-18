@@ -52,7 +52,7 @@
             <form>
                 <table>
                     Message: <input type="text" required='required' size="100" id="msg_body"/><br>
-                    Radius: <input type="number" step="1" required='required' id="msg_radius"/>(meters)<br> 
+                    Radius: <input type="number" step="1"  id="msg_radius" required='required' min="0" oninput="validity.valid||(value='');"/>(meters)<br> 
                 </table>
                 <input type="submit" value="Send new message"  id="sendMsgButtonClick"/><br>
             </form>
