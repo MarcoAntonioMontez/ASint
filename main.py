@@ -259,20 +259,16 @@ def create_user():
                 if getDistance(float(user_info[1]), float(user_info[2]), float(request.json['latitude']), float(request.json['longitude']))>2:
                     #Create Move
                     with cnx.cursor() as cursor:
-<<<<<<< HEAD
+
                         now = datetime.now()
                         str_now = now.strftime('%Y-%m-%d %H:%M:%S')
                         sql = "INSERT INTO user_move (user_id, move_time, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s, %s);"
                         cursor.execute(sql, (session['username'], str_now, user_info[1], user_info[2], request.json['latitude'], request.json['longitude']))
-=======
-                        sql = "INSERT INTO user_move (user_id, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s);"
-                        cursor.execute(sql, (session['username'], user_info[1], user_info[2], request.json['latitude'], request.json['longitude']))
-                        sql = "SELECT ID FROM user_move ORDER BY ID DESC LIMIT 1;"
-                        cursor.execute(sql)
                         result = cursor.fetchall()
+
                         sql = "INSERT INTO logs (content_id, user_id, entry_type) VALUES (%s, %s, 'Move');"
                         cursor.execute(sql, (result[0][0], session['username']))
->>>>>>> 15b9e22929e5d579e424a87ed1a6ecce3a9d7563
+
         cnx.close()
         
         json_to_send = None
