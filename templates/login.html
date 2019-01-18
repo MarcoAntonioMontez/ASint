@@ -1,15 +1,31 @@
+<html>
 <head>
-    <title>Montalvileiro/Cordalvezil</title>
+    <title>Montalvileiro</title>
+    <style type="text/css">
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="static/jquery.js"></script>
+    <script src="static/jquery-ui.js"></script>
+    
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
-    
-	<h1>Montalvileiro/Cordalvezil</h1>
-	<h2>Please Login into your Fenix account</h2>
-    <form action="https://asint-227116.appspot.com/redirect" method="POST">
-  		<div class="container">
-    		<button type="submit">Login</button>
-  		</div>
-	</form>
-
-    
+    <header>
+      <div class="container">
+        <h1 class="logo">Welcome to Montalvileiro</h1>
+      </div>
+    </header>
+    <div class="container">
+        <center>
+        <h3>Please Login into your Fenix account</h3>
+        <form action="https://asint-227116.appspot.com/redirect" method="POST">
+  		    <div class="container">
+                <center>
+    		        <button type="submit">Login</button>
+                </center>
+            </div>
+	    </form>
+        </center>
+    </div>
 </body>
+</html>

@@ -4,16 +4,16 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Welcome!</title>
-
+    <title>Montalvileiro</title>
     <style type="text/css">
     </style>
-   <link rel="stylesheet" href="static/jquery-ui.css"> </link>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script src="static/jquery.js"></script>
-     <script src="static/jquery-ui.js"></script>
-
-     <style>
-  .ui-autocomplete {
+    <script src="static/jquery-ui.js"></script>
+    
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+    .ui-autocomplete {
     max-height: 100px;
     overflow-y: auto;
     /* prevent horizontal scrollbar */
@@ -29,57 +29,43 @@
 </head>
 
 <body>
+    <header>
+      <div class="container">
+        <h1 class="logo">Welcome to Montalvileiro</h1>
+        <strong><nav>
+          <ul class="menu">
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+          </ul>
+        </nav></strong>
+      </div>
+    </header>
 
-
-<h1>Nearby Users</h1>
-    <textarea rows="5" cols="75" id="divDestiny"></textarea>
-<br><br>
-<form action='index.html'>
-  <input type="submit" value="&#8592;"  id="GoButtonClick"/> <span>&nbsp;Go to message page<span> 
-    <br>
-</form>
-<br>
-
-<script>
-    function getCookieValue(a) {
-        var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
-        return b ? b.pop() : '';
-    }
-    
-    ReadMessages();
-    setInterval(ReadMessages, 3000);
-    function ReadMessages() {
-        $( document ).ready(function() {    
-                 
-            var desturl =  "https://asint-227116.appspot.com/nearbyUsers";
-            $("#divDestiny").html("waiting");
-            $.ajax({
-                type: "GET",
-                url: desturl,
-                datatype: "json",
-                contentType: "text/plain",
-                data: '',
-                success: function (data) {
-                    if(data == null || data == "")
-                        $("#divDestiny").html("No users nearby");
-                    else{
-                        var answer = JSON.parse("["+data+"]");
-                        var messages = "";
-                        for (var i = 0; i < answer.length; i++) {
-                            messages += "User " + answer[i].id + "\n";
-                        }
-                        console.log(messages);
-                        document.getElementById('divDestiny').innerHTML = messages;
-                    }
-                }
-            });
-        });
-    }
-</script>
-<form action="https://asint-227116.appspot.com/logout" method="GET">
-    <div class="container" style="position: absolute; top: 20px; right: 20px; padding=10px;">
-        <button type="submit">Logout</button>
+    <div class="container">
+        <center>
+        <h3>Nearby Users</h3>
+        <textarea rows="5" cols="75" id="divDestiny">{{ names }}</textarea>
+        <br><br>
+        </center>        
     </div>
-</form>
+
+
+    <div class="container">
+        <center>
+        <form action='index.html'>
+        <input type="submit" value="&#8592;"  id="GoButtonClick"/> <span>&nbsp;Go to message page<span> 
+        <br>
+        </form>
+        <br>
+        </center>        
+    </div>
+
+
+    <script>
+        function getCookieValue(a) {
+            var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+            return b ? b.pop() : '';
+        }
+
+    </script>
 </body>
 </html>

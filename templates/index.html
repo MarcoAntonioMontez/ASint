@@ -4,16 +4,15 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>Welcome!</title>
-
+    <title>Montalvileiro</title>
     <style type="text/css">
     </style>
-   <link rel="stylesheet" href="static/jquery-ui.css"> </link>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script src="static/jquery.js"></script>
      <script src="static/jquery-ui.js"></script>
-
-     <style>
-  .ui-autocomplete {
+    
+    <style>
+    .ui-autocomplete {
     max-height: 100px;
     overflow-y: auto;
     /* prevent horizontal scrollbar */
@@ -29,23 +28,49 @@
 </head>
 
 <body>
+ <header>
+      <div class="container">
+        <h1 class="logo">Welcome to Montalvileiro</h1>
+        <strong><nav>
+          <ul class="menu">
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+          </ul>
+        </nav></strong>
+      </div>
+    </header>
 
-
-<h1>Welcome!</h1>
-
-<h2>Messages:</h2>
-    <textarea rows="5" cols="75" id="divDestiny"></textarea>
-<br><br>
-<form action='https://asint-227116.appspot.com/sendMessage.html'>
-   Send a new message <input type="submit" value="&#8594;"  id="GoButtonClick"/><br>
-</form>
-
-<h3>Nearby users:</h3>
-<form action='nearbyUsers.html'>
-   Check nearby users <input type="submit" value="&#8594;"  id="GoButtonClick2"/><br>
-</form>
-
+    <div class="container">
+        <center>
+        <h3>Messages:</h3>
+        <textarea rows="5" cols="75" id="divDestiny"></textarea>
+        <br><br>
+        <form action='https://asint-227116.appspot.com/sendMessage.html'>
+            Send a new message <input type="submit" value="&#8594;"  id="GoButtonClick"/><br>
+        </form>
+        </center>
+    </div>
+    
+    <div class = "container">
+        <center>
+        <h3>Check nearby users:</h3>
+        <form action='https://asint-227116.appspot.com/nearbyUsers' method='POST' onsubmit="return checkform()">
+            Radius <input type="number" name="radius"  id="test">(meters)<br> 
+            <button type="submit" value="Submit" id=btnSubmit>Go</button>
+        </form>
+        </center>
+    </div>
+    
 <script>
+    function checkform(){
+        var fieldvalue = $.trim($('#test').val());
+        if(!fieldvalue || fieldvalue==""){
+            alert('No input radius');
+            return false;
+        }else{
+            return true;
+        }
+    }
+    
     function getCookieValue(a) {
         var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
         return b ? b.pop() : '';
@@ -77,7 +102,7 @@
             }
                     
             var desturl =  "https://asint-227116.appspot.com/users/messages_all";
-            $("#divDestiny").html("waiting");
+            $("#divDestiny").html("...");
             $.ajax({
                 type: "GET",
                 url: desturl,
@@ -100,11 +125,9 @@
             });
         });
     }
+
+    
 </script>
-<form action="https://asint-227116.appspot.com/logout" method="GET">
-    <div class="container" style="position: absolute; top: 20px; right: 20px; padding=10px;">
-        <button type="submit">Logout</button>
-    </div>
-</form>
+
 </body>
 </html>

@@ -29,7 +29,7 @@ while(1):
     #    r = requests.post(url, data=json.dumps(builddata))   
     #    
     elif (command=='list_all_users'):
-        url = "https://asint-227116.appspot.com/users"
+        url = "https://asint-227116.appspot.com/usersall"
         r = requests.get(url)
         print(r.content)
     #elif (command=='list_users_building'):

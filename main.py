@@ -17,6 +17,7 @@ import fenixedu
 import bmemcached
 import os
 import pymysql
+from datetime import datetime
 
 config = fenixedu.FenixEduConfiguration.fromConfigFile('fenixedu.ini')
 client = fenixedu.FenixEduClient(config)
@@ -104,7 +105,7 @@ def checkToken(token, username):
 
 def getDistance(lat1, lon1, lat2, lon2): 
     # approximate radius of earth in meters
-    R = 6373000.0
+    R = 6371000.0
     lat1=radians(lat1)
     lon1=radians(lon1)
     lat2=radians(lat2)
@@ -160,7 +161,7 @@ def callback():
     resp.set_cookie('username', username, secure=True)  #accessible in javascript
     return resp 
 
-@app.route('/index', methods=["GET"])
+@app.route('/index', methods=["GET", "POST"])
 def index():
     if(not checkToken(session['access_token'], session['username'])):
         authorization_url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=1414440104755257&redirect_uri=https://asint-227116.appspot.com/callback'
@@ -168,11 +169,21 @@ def index():
     else:
         return render_template('index.html')
 
-@app.route('/users', methods=['GET'])
+@app.route('/usersall', methods=['GET'])
 def get_users():
     cnx = get_connection()
     with cnx.cursor() as cursor:
         sql = "SELECT user_id FROM users;"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    cnx.close()
+    return jsonify(result)
+
+@app.route('/buildings', methods=['GET'])
+def get_buildings():
+    cnx = get_connection()
+    with cnx.cursor() as cursor:
+        sql = "SELECT * FROM buildings;"
         cursor.execute(sql)
         result = cursor.fetchall()
     cnx.close()
@@ -184,13 +195,6 @@ def sendMessage():
         abort(403)
     else:
         return render_template('sendMessage.html')
-
-@app.route('/nearbyUsers.html')
-def check_nearby_users():
-    if(not checkToken(session['access_token'], session['username'])):
-        abort(403)
-    else:
-        return render_template('nearbyUsers.html')
 
 @app.route('/index.html')
 def indexHTML():
@@ -240,10 +244,11 @@ def create_user():
             cursor.execute(sql)
             result = cursor.fetchall()
             exists = False
-            for users_now in result:
-                if session['username'] == users_now[0]:
+            for user in result:
+                if session['username'] == user[0]:
                     exists = True
-                    user_info = users_now
+                    print('here')
+                    user_info = user
                     break
             if exists == False:
                 sql = "INSERT INTO users (user_id, user_latitude, user_longitude) VALUES (%s, %s, %s);"
@@ -251,11 +256,13 @@ def create_user():
             else:
                 sql = "UPDATE users SET user_latitude = %s, user_longitude = %s WHERE user_id = %s;"
                 cursor.execute(sql, (request.json['latitude'], request.json['longitude'], session['username']))
-                if getDistance(float(user_info[1]), float(user_info[2]), float(request.json['latitude']), float(request.json['longitude']))>1:
+                if getDistance(float(user_info[1]), float(user_info[2]), float(request.json['latitude']), float(request.json['longitude']))>2:
                     #Create Move
                     with cnx.cursor() as cursor:
-                        sql = "INSERT INTO user_move (user_id, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s);"
-                        cursor.execute(sql, (session['username'], user_info[1], user_info[2], request.json['latitude'], request.json['longitude']))
+                        now = datetime.now()
+                        str_now = now.strftime('%Y-%m-%d %H:%M:%S')
+                        sql = "INSERT INTO user_move (user_id, move_time, old_latitude, old_longitude, new_latitude, new_longitude) VALUES (%s, %s, %s, %s, %s, %s);"
+                        cursor.execute(sql, (session['username'], str_now, user_info[1], user_info[2], request.json['latitude'], request.json['longitude']))
         cnx.close()
         
         json_to_send = None
@@ -272,8 +279,10 @@ def receive_user_message():
         json_to_send = None
         cnx = get_connection()
         with cnx.cursor() as cursor:
-            sql = "INSERT INTO user_msg (user_id, msg_body, latitude, longitude, radius) VALUES (%s, %s, %s, %s, %s);"
-            cursor.execute(sql, (request.json['id'], request.json['message'], request.json['latitude'], request.json['longitude'], request.json['radius']))
+            now = datetime.now()
+            str_now = now.strftime('%Y-%m-%d %H:%M:%S')
+            sql = "INSERT INTO user_msg (user_id, msg_time, msg_body, latitude, longitude, radius) VALUES (%s, %s, %s, %s, %s, %s);"
+            cursor.execute(sql, (request.json['id'], str_now, request.json['message'], request.json['latitude'], request.json['longitude'], request.json['radius']))
             print(result.statement)
         cnx.close()
 
@@ -318,28 +327,23 @@ def get_nearby_users():
     if(not checkToken(session['access_token'], session['username'])):
         abort(403)
     else:
-        radius = request.json['radius']
+        radius = request.form['radius']
         cnx = get_connection()
         with cnx.cursor() as cursor:
             sql = "SELECT user_id, user_latitude, user_longitude FROM users;"
             cursor.execute(sql)
             results = cursor.fetchall()
+            print(results)
+            data = []
             for row in results:
                 if row[0] == session['username']:
                     this_user = row
             if this_user != None:      
-                data = {}     
-                for other_user in results:
-                
-                    if getDistance(float(this_user[1]), float(this_user[2]), float(other_user[1]), float(other_user[2])) <= radius:              
-                        data['id'] = other_user[0]
-                        json_data = json.dumps(data)
-                        if(json_to_send == None):
-                            json_to_send = json_data
-                        else:
-                            json_to_send = json_to_send + "," + json_data 
-                            
-        return jsonify(json_to_send)
+                for user in results:
+                    if user[0] != session['username']:
+                        if getDistance(float(this_user[1]), float(this_user[2]), float(user[1]), float(user[2])) <= float(radius):              
+                            data.append(user[0])  
+        return render_template('nearbyUsers.html', names = data)                    
 
 @app.errorhandler(404)
 def not_found(error):

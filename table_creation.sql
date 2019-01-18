@@ -1,4 +1,3 @@
-
 drop table buildings;
 drop table user_msg;
 drop table user_move;
@@ -9,8 +8,8 @@ drop table users;
 
 create table users
 	(user_id	varchar(20) not null unique,
-	 user_latitude 	float(15) not null,
-	 user_longitude float(15) not null,
+	 user_latitude 	double not null,
+	 user_longitude double not null,
 	 primary key(user_id));
 
 create table logs
@@ -25,10 +24,10 @@ create table user_move
 	(move_id 	int NOT NULL AUTO_INCREMENT,
 	 user_id	varchar(20) not null,
 	 move_time datetime,
-	 old_latitude	float(15) not null,
-	 old_longitude	float(15) not null,
-	 new_latitude	float(15) not null,
-	 new_longitude	float(15) not null,
+	 old_latitude	double not null,
+	 old_longitude	double not null,
+	 new_latitude	double not null,
+	 new_longitude	double not null,
 	 primary key(move_id),
 	 foreign key(user_id) references users(user_id));
 
@@ -37,9 +36,9 @@ create table user_msg
 	 user_id	varchar(20) not null,
 	 msg_time datetime,
 	 msg_body varchar(200) not null,
-	 latitude	float(15) not null,
-	 longitude	float(15) not null,
-	 radius float(2) not null,
+	 latitude	double not null,
+	 longitude	double not null,
+	 radius float(2) not null check (radius>=0),
 	 primary key(msg_id),
 	 foreign key(user_id) references users(user_id));
 
@@ -47,9 +46,9 @@ create table user_msg
 create table buildings
 	(building_id 	int NOT NULL AUTO_INCREMENT,
 	 building_name varchar(200),
-	 latitude	float(15) not null,
-	 longitude	float(15) not null,
-	 radius float(2) not null,
+	 latitude	double not null,
+	 longitude  double not null,
+	 radius float(2) not null check (radius>=0),
 	 primary key(building_id));
 
 insert into buildings (building_name, latitude, longitude, radius) VALUES ('Biblioteca','38.811977','-9.094261','10');
