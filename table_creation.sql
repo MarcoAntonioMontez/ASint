@@ -21,25 +21,40 @@ create table logs
 	 foreign key(user_id) references users(user_id));
 
 create table user_move
-	(move_id 	int NOT NULL AUTO_INCREMENT,
+	(ID 	int NOT NULL AUTO_INCREMENT,
 	 user_id	varchar(20) not null,
 	 move_time datetime,
+<<<<<<< HEAD
 	 old_latitude	double not null,
 	 old_longitude	double not null,
 	 new_latitude	double not null,
 	 new_longitude	double not null,
 	 primary key(move_id),
+=======
+	 old_latitude	float(15) not null,
+	 old_longitude	float(15) not null,
+	 new_latitude	float(15) not null,
+	 new_longitude	float(15) not null,
+	 primary key(ID),
+>>>>>>> 15b9e22929e5d579e424a87ed1a6ecce3a9d7563
 	 foreign key(user_id) references users(user_id));
 
 create table user_msg
-	(msg_id 	int NOT NULL AUTO_INCREMENT,
+	(ID 	int NOT NULL AUTO_INCREMENT,
 	 user_id	varchar(20) not null,
 	 msg_time datetime,
 	 msg_body varchar(200) not null,
+<<<<<<< HEAD
 	 latitude	double not null,
 	 longitude	double not null,
 	 radius float(2) not null check (radius>=0),
 	 primary key(msg_id),
+=======
+	 latitude	float(15) not null,
+	 longitude	float(15) not null,
+	 radius float(2) not null,
+	 primary key(ID),
+>>>>>>> 15b9e22929e5d579e424a87ed1a6ecce3a9d7563
 	 foreign key(user_id) references users(user_id));
 
 
