@@ -1,5 +1,5 @@
 Flask==1.0.2
-urllib3==1.23
+urllib3==1.24.2
 flask-cors==3.0.7
 fenixedu==1.0.0
 requests==2.21.0
